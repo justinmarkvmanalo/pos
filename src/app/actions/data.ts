@@ -1,10 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireUser } from "@/lib/auth";
+import { requireAuthContext } from "@/lib/auth";
 import { getCurrentWeekIso } from "@/lib/data";
 import { buildWeeklyReviewText } from "@/lib/review";
-import { getSupabaseServerClient } from "@/lib/supabase";
+import { getSupabaseUserServerClient } from "@/lib/supabase";
 
 export type ActionState = {
   message: string;
@@ -14,8 +14,9 @@ export const initialActionState: ActionState = {
   message: "",
 };
 
-function getSupabaseOrThrow() {
-  const supabase = getSupabaseServerClient();
+async function getSupabaseOrThrow() {
+  const auth = await requireAuthContext();
+  const supabase = getSupabaseUserServerClient(auth.accessToken);
   if (!supabase) {
     throw new Error("Supabase is not configured.");
   }
@@ -39,8 +40,7 @@ export async function createTaskAction(
   _: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const user = await requireUser();
-  const supabase = getSupabaseOrThrow();
+  const supabase = await getSupabaseOrThrow();
 
   const title = getTrimmedField(formData, "title");
   const note = getTrimmedField(formData, "note");
@@ -53,7 +53,6 @@ export async function createTaskAction(
   }
 
   const { error } = await supabase.from("tasks").insert({
-    owner_id: user.id,
     title,
     note,
     energy,
@@ -73,8 +72,7 @@ export async function createGoalAction(
   _: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const user = await requireUser();
-  const supabase = getSupabaseOrThrow();
+  const supabase = await getSupabaseOrThrow();
 
   const title = getTrimmedField(formData, "title");
   const ownerNote = getTrimmedField(formData, "owner_note");
@@ -86,7 +84,6 @@ export async function createGoalAction(
   }
 
   const { error } = await supabase.from("goals").insert({
-    owner_id: user.id,
     title,
     owner_note: ownerNote,
     deadline,
@@ -105,8 +102,7 @@ export async function createMilestoneAction(
   _: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const user = await requireUser();
-  const supabase = getSupabaseOrThrow();
+  const supabase = await getSupabaseOrThrow();
 
   const goalId = getTrimmedField(formData, "goal_id");
   const name = getTrimmedField(formData, "name");
@@ -121,7 +117,6 @@ export async function createMilestoneAction(
     .from("goals")
     .select("id")
     .eq("id", goalId)
-    .eq("owner_id", user.id)
     .maybeSingle();
 
   if (goalError || !goal) {
@@ -129,7 +124,6 @@ export async function createMilestoneAction(
   }
 
   const { error } = await supabase.from("milestones").insert({
-    owner_id: user.id,
     goal_id: goalId,
     name,
     status,
@@ -148,8 +142,7 @@ export async function createHabitAction(
   _: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const user = await requireUser();
-  const supabase = getSupabaseOrThrow();
+  const supabase = await getSupabaseOrThrow();
 
   const name = getTrimmedField(formData, "name");
   const targetFrequency = Number(formData.get("target_frequency") ?? 7);
@@ -159,7 +152,6 @@ export async function createHabitAction(
   }
 
   const { error } = await supabase.from("habits").insert({
-    owner_id: user.id,
     name,
     target_frequency: targetFrequency,
   });
@@ -173,8 +165,7 @@ export async function createHabitAction(
 }
 
 export async function logHabitAction(formData: FormData) {
-  const user = await requireUser();
-  const supabase = getSupabaseOrThrow();
+  const supabase = await getSupabaseOrThrow();
 
   const habitId = getTrimmedField(formData, "habit_id");
   const completedOn = getTrimmedField(formData, "completed_on") || new Date().toISOString().slice(0, 10);
@@ -183,12 +174,7 @@ export async function logHabitAction(formData: FormData) {
     return;
   }
 
-  const { data: habit } = await supabase
-    .from("habits")
-    .select("id")
-    .eq("id", habitId)
-    .eq("owner_id", user.id)
-    .maybeSingle();
+  const { data: habit } = await supabase.from("habits").select("id").eq("id", habitId).maybeSingle();
 
   if (!habit) {
     return;
@@ -196,7 +182,6 @@ export async function logHabitAction(formData: FormData) {
 
   await supabase.from("habit_logs").upsert(
     {
-      owner_id: user.id,
       habit_id: habitId,
       completed_on: completedOn,
       completed: true,
@@ -213,8 +198,7 @@ export async function createCaptureAction(
   _: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const user = await requireUser();
-  const supabase = getSupabaseOrThrow();
+  const supabase = await getSupabaseOrThrow();
 
   const body = getTrimmedField(formData, "body");
 
@@ -223,7 +207,6 @@ export async function createCaptureAction(
   }
 
   const { error } = await supabase.from("captures").insert({
-    owner_id: user.id,
     body,
     source: "manual",
     archived: false,
@@ -238,13 +221,13 @@ export async function createCaptureAction(
 }
 
 export async function generateReviewAction() {
-  const user = await requireUser();
-  const supabase = getSupabaseOrThrow();
+  const auth = await requireAuthContext();
+  const supabase = await getSupabaseOrThrow();
   const summary = await buildWeeklyReviewText();
 
   await supabase.from("weekly_reviews").upsert(
     {
-      owner_id: user.id,
+      owner_id: auth.user.id,
       week_of: getCurrentWeekIso(),
       summary,
       prompt:

@@ -18,7 +18,7 @@ npm install
 ```
 
 2. Copy `.env.example` to `.env.local` and fill in your Supabase values.
-   You need `SUPABASE_SERVICE_ROLE_KEY` because the app verifies the logged-in user on the server and writes user-owned rows through Server Actions.
+   The app uses the logged-in user's Supabase session on the server, so only the public URL and anon key are required here.
 
 3. Run the app:
 
@@ -38,10 +38,10 @@ Run [supabase/schema.sql](/C:/Users/Justin%20Mark/OneDrive/Desktop/pos/supabase/
 - `captures`
 - `weekly_reviews`
 
-Every table is now user-scoped with an `owner_id` linked to `auth.users`, and the schema enables RLS policies so authenticated users can only access their own rows.
+Every table is now user-scoped with an `owner_id` linked to `auth.users`, and the schema enables RLS policies so authenticated users can only access and create their own rows.
 
 If you already created the old schema, apply the updated SQL before using the new app. Existing rows from the old schema may need their `owner_id` backfilled manually if you want them to appear under a user account.
 
 ## Status
 
-The UI reads from your live Supabase tables, redirects unauthenticated users to `/login`, and provides in-app forms for creating the main records instead of requiring direct inserts in Supabase.
+The UI reads from your live Supabase tables, redirects unauthenticated users to `/login`, and provides in-app forms for creating the main records under the current user.

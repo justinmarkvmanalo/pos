@@ -20,8 +20,8 @@ export default async function LoginPage() {
         </p>
         {!hasSupabaseEnv() ? (
           <div className="mt-5 rounded-[1.5rem] border border-dashed border-border bg-surface-strong p-4 text-sm text-ink-soft">
-            Supabase is not fully configured yet. Set `NEXT_PUBLIC_SUPABASE_URL`,
-            `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` in `.env.local`.
+            Supabase is not fully configured yet. Set `NEXT_PUBLIC_SUPABASE_URL` and
+            `NEXT_PUBLIC_SUPABASE_ANON_KEY` in `.env.local`.
           </div>
         ) : null}
       </section>

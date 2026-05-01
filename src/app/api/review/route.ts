@@ -1,17 +1,17 @@
+import { getOptionalAuthContext } from "@/lib/auth";
 import { getCurrentWeekIso, getReviewPrompt } from "@/lib/data";
 import { buildWeeklyReviewText } from "@/lib/review";
-import { getSupabaseServerClient } from "@/lib/supabase";
-import { getOptionalUser } from "@/lib/auth";
+import { getSupabaseUserServerClient } from "@/lib/supabase";
 
 export async function GET(request: Request) {
   void request;
 
-  const user = await getOptionalUser();
-  if (!user) {
+  const auth = await getOptionalAuthContext();
+  if (!auth) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const supabase = getSupabaseServerClient();
+  const supabase = getSupabaseUserServerClient(auth.accessToken);
   if (!supabase) {
     return Response.json({ error: "Supabase is not configured." }, { status: 500 });
   }
@@ -22,7 +22,7 @@ export async function GET(request: Request) {
 
   const { error } = await supabase.from("weekly_reviews").upsert(
     {
-      owner_id: user.id,
+      owner_id: auth.user.id,
       week_of: weekOf,
       summary,
       prompt,

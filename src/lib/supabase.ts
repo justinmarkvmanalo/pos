@@ -2,14 +2,13 @@ import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 export function hasSupabasePublicEnv() {
   return Boolean(supabaseUrl && supabaseAnonKey);
 }
 
 export function hasSupabaseEnv() {
-  return Boolean(supabaseUrl && supabaseAnonKey && supabaseServiceRoleKey);
+  return hasSupabasePublicEnv();
 }
 
 export function getSupabaseAuthClient() {
@@ -25,12 +24,17 @@ export function getSupabaseAuthClient() {
   });
 }
 
-export function getSupabaseServerClient() {
-  if (!supabaseUrl || !supabaseServiceRoleKey) {
+export function getSupabaseUserServerClient(accessToken: string) {
+  if (!supabaseUrl || !supabaseAnonKey) {
     return null;
   }
 
-  return createClient(supabaseUrl, supabaseServiceRoleKey, {
+  return createClient(supabaseUrl, supabaseAnonKey, {
+    global: {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
     auth: {
       autoRefreshToken: false,
       persistSession: false,

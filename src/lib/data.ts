@@ -1,6 +1,6 @@
 import { cache } from "react";
-import { requireUser } from "@/lib/auth";
-import { getSupabaseServerClient, hasSupabaseEnv } from "@/lib/supabase";
+import { requireAuthContext } from "@/lib/auth";
+import { getSupabaseUserServerClient, hasSupabaseEnv } from "@/lib/supabase";
 import type {
   CaptureItem,
   DashboardSnapshot,
@@ -222,9 +222,7 @@ const emptySnapshot: DashboardSnapshot = {
   review: {
     readiness: "Configure Supabase",
     prompt: REVIEW_PROMPT,
-    highlights: [
-      "Set NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, and SUPABASE_SERVICE_ROLE_KEY.",
-    ],
+    highlights: ["Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY."],
     latestSummary: null,
   },
   captures: [],
@@ -235,8 +233,8 @@ export const getDashboardSnapshot = cache(async (): Promise<DashboardSnapshot> =
     return emptySnapshot;
   }
 
-  const user = await requireUser();
-  const supabase = getSupabaseServerClient();
+  const auth = await requireAuthContext();
+  const supabase = getSupabaseUserServerClient(auth.accessToken);
   if (!supabase) {
     return emptySnapshot;
   }
@@ -259,42 +257,32 @@ export const getDashboardSnapshot = cache(async (): Promise<DashboardSnapshot> =
     supabase
       .from("tasks")
       .select("id,title,note,energy,done,task_date")
-      .eq("owner_id", user.id)
       .eq("task_date", todayIso)
       .order("focus_order", { ascending: true })
       .limit(3),
-    supabase
-      .from("goals")
-      .select("id,title,owner_note,deadline,progress")
-      .eq("owner_id", user.id)
-      .order("created_at", { ascending: true }),
-    supabase
-      .from("milestones")
-      .select("id,goal_id,name,status,sort_order")
-      .eq("owner_id", user.id)
-      .order("sort_order", { ascending: true }),
-    supabase
-      .from("habits")
-      .select("id,name,target_frequency")
-      .eq("owner_id", user.id)
-      .order("name", { ascending: true }),
+    supabase.from("goals").select("id,title,owner_note,deadline,progress").order("created_at", {
+      ascending: true,
+    }),
+    supabase.from("milestones").select("id,goal_id,name,status,sort_order").order("sort_order", {
+      ascending: true,
+    }),
+    supabase.from("habits").select("id,name,target_frequency").order("name", {
+      ascending: true,
+    }),
     supabase
       .from("habit_logs")
       .select("habit_id,completed_on,completed")
-      .eq("owner_id", user.id)
       .gte("completed_on", habitWindowStartIso)
       .order("completed_on", { ascending: true }),
     supabase
       .from("captures")
       .select("id,body,created_at")
-      .eq("owner_id", user.id)
       .eq("archived", false)
       .order("created_at", { ascending: false })
       .limit(5),
     supabase
       .from("weekly_reviews")
       .select("id,week_of,summary,prompt")
-      .eq("owner_id", user.id)
       .order("week_of", { ascending: false })
       .limit(1)
       .maybeSingle(),
@@ -335,8 +323,8 @@ export const getDashboardSnapshot = cache(async (): Promise<DashboardSnapshot> =
   return {
     isConfigured: true,
     user: {
-      id: user.id,
-      email: user.email ?? "Account",
+      id: auth.user.id,
+      email: auth.user.email ?? "Account",
     },
     dailyFocus: {
       dateLabel: formatDateLabel(today),

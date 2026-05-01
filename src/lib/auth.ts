@@ -7,6 +7,11 @@ import { getSupabaseAuthClient, hasSupabasePublicEnv } from "@/lib/supabase";
 const ACCESS_TOKEN_COOKIE = "pos-access-token";
 const REFRESH_TOKEN_COOKIE = "pos-refresh-token";
 
+export type AuthContext = {
+  accessToken: string;
+  user: User;
+};
+
 export async function setAuthSession(session: Session) {
   const cookieStore = await cookies();
 
@@ -33,13 +38,14 @@ export async function clearAuthSession() {
   cookieStore.delete(REFRESH_TOKEN_COOKIE);
 }
 
-export const getOptionalUser = cache(async (): Promise<User | null> => {
+export const getOptionalAuthContext = cache(async (): Promise<AuthContext | null> => {
   if (!hasSupabasePublicEnv()) {
     return null;
   }
 
   const cookieStore = await cookies();
   const accessToken = cookieStore.get(ACCESS_TOKEN_COOKIE)?.value;
+
   if (!accessToken) {
     return null;
   }
@@ -54,14 +60,27 @@ export const getOptionalUser = cache(async (): Promise<User | null> => {
     return null;
   }
 
-  return data.user;
+  return {
+    accessToken,
+    user: data.user,
+  };
 });
 
-export const requireUser = cache(async (): Promise<User> => {
-  const user = await getOptionalUser();
-  if (!user) {
+export const getOptionalUser = cache(async (): Promise<User | null> => {
+  const auth = await getOptionalAuthContext();
+  return auth?.user ?? null;
+});
+
+export const requireAuthContext = cache(async (): Promise<AuthContext> => {
+  const auth = await getOptionalAuthContext();
+  if (!auth) {
     redirect("/login");
   }
 
-  return user;
+  return auth;
+});
+
+export const requireUser = cache(async (): Promise<User> => {
+  const auth = await requireAuthContext();
+  return auth.user;
 });
