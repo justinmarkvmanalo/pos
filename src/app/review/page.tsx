@@ -1,4 +1,5 @@
 import { AppShell } from "@/components/app-shell";
+import { ReviewGenerateButton } from "@/components/review-generate-button";
 import { getDashboardSnapshot } from "@/lib/data";
 import { buildWeeklyReviewText } from "@/lib/review";
 
@@ -13,6 +14,7 @@ export default async function ReviewPage() {
           <p className="text-sm uppercase tracking-[0.2em] text-ink-soft">Weekly review</p>
           <h1 className="display mt-2 text-4xl">Reflection with actual operating data</h1>
           <p className="mt-4 max-w-3xl text-base leading-7 text-ink-soft">{review.prompt}</p>
+          <ReviewGenerateButton />
 
           <div className="mt-6 rounded-[1.5rem] bg-[#201914] p-5 text-[#fff7ef]">
             <p className="text-xs uppercase tracking-[0.18em] text-[#d7c6b8]">Auto-summary draft</p>

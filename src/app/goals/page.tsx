@@ -1,4 +1,6 @@
 import { AppShell } from "@/components/app-shell";
+import { GoalForm } from "@/components/goal-form";
+import { MilestoneForm } from "@/components/milestone-form";
 import { getDashboardSnapshot } from "@/lib/data";
 
 export default async function GoalsPage() {
@@ -13,6 +15,7 @@ export default async function GoalsPage() {
           Goals stay concrete here: every target has a due date, a progress bar, and a next stage
           that makes weekly reviews operational instead of vague.
         </p>
+        <GoalForm />
       </section>
 
       <section className="grid gap-6 xl:grid-cols-3">
@@ -59,6 +62,7 @@ export default async function GoalsPage() {
                 </div>
               ))}
             </div>
+            <MilestoneForm goalId={goal.id} />
           </article>
         ))}
       </section>

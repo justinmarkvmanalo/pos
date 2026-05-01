@@ -1,12 +1,13 @@
 import { getCurrentWeekIso, getReviewPrompt } from "@/lib/data";
 import { buildWeeklyReviewText } from "@/lib/review";
 import { getSupabaseServerClient } from "@/lib/supabase";
+import { getOptionalUser } from "@/lib/auth";
 
 export async function GET(request: Request) {
-  const authHeader = request.headers.get("authorization");
-  const expectedSecret = process.env.CRON_SECRET;
+  void request;
 
-  if (expectedSecret && authHeader !== `Bearer ${expectedSecret}`) {
+  const user = await getOptionalUser();
+  if (!user) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -21,12 +22,13 @@ export async function GET(request: Request) {
 
   const { error } = await supabase.from("weekly_reviews").upsert(
     {
+      owner_id: user.id,
       week_of: weekOf,
       summary,
       prompt,
     },
     {
-      onConflict: "week_of",
+      onConflict: "owner_id,week_of",
     },
   );
 

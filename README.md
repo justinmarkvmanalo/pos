@@ -1,14 +1,13 @@
 # Life OS
 
-A Vercel-friendly personal command center built with Next.js, Tailwind CSS, and Supabase.
+A personal command center built with Next.js, Tailwind CSS, and Supabase.
 
 ## Included
 
-- Daily Focus dashboard with top 3 tasks and streak summary
-- Goal tracker with milestones and progress bars
-- Habit logger with contribution-style heatmap
-- Quick Capture inbox
-- Weekly Review page plus a cron-ready `/api/review` endpoint
+- Email sign up and log in
+- Per-user tasks, goals, milestones, habits, captures, and weekly reviews
+- Add buttons and forms for the core entities directly in the UI
+- Habit heatmap and weekly completion tracking
 
 ## Local setup
 
@@ -19,7 +18,7 @@ npm install
 ```
 
 2. Copy `.env.example` to `.env.local` and fill in your Supabase values.
-   You need `SUPABASE_SERVICE_ROLE_KEY` because the app reads and writes through server-side route handlers and Server Components.
+   You need `SUPABASE_SERVICE_ROLE_KEY` because the app verifies the logged-in user on the server and writes user-owned rows through Server Actions.
 
 3. Run the app:
 
@@ -39,10 +38,10 @@ Run [supabase/schema.sql](/C:/Users/Justin%20Mark/OneDrive/Desktop/pos/supabase/
 - `captures`
 - `weekly_reviews`
 
-## Vercel cron
+Every table is now user-scoped with an `owner_id` linked to `auth.users`, and the schema enables RLS policies so authenticated users can only access their own rows.
 
-`vercel.json` schedules `GET /api/review` every Friday at `09:00` UTC. Set `CRON_SECRET` in Vercel and send `Authorization: Bearer <CRON_SECRET>` if you want the endpoint locked down.
+If you already created the old schema, apply the updated SQL before using the new app. Existing rows from the old schema may need their `owner_id` backfilled manually if you want them to appear under a user account.
 
 ## Status
 
-The UI now reads from your live Supabase tables and shows empty states when the database is blank. `POST /api/captures` writes to `captures`, and `GET /api/review` generates and stores a row in `weekly_reviews`.
+The UI reads from your live Supabase tables, redirects unauthenticated users to `/login`, and provides in-app forms for creating the main records instead of requiring direct inserts in Supabase.

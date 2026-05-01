@@ -1,5 +1,7 @@
 import { AppShell } from "@/components/app-shell";
+import { HabitForm } from "@/components/habit-form";
 import { Heatmap } from "@/components/heatmap";
+import { HabitLogButton } from "@/components/habit-log-button";
 import { getDashboardSnapshot } from "@/lib/data";
 
 export default async function HabitsPage() {
@@ -15,6 +17,7 @@ export default async function HabitsPage() {
             The heatmap makes the trend obvious. The weekly count keeps the standard honest. The
             streak is there for motivation, but the real point is reducing decision friction.
           </p>
+          <HabitForm />
           <Heatmap entries={habits.heatmap} />
         </div>
 
@@ -29,8 +32,9 @@ export default async function HabitsPage() {
               <p className="text-sm uppercase tracking-[0.16em] text-ink-soft">{habit.name}</p>
               <p className="mt-3 text-4xl font-semibold">{habit.currentRun} days</p>
               <p className="mt-2 text-sm text-ink-soft">
-                {habit.completedThisWeek} completions logged this week.
+                {habit.completedThisWeek} of {habit.targetFrequency} completions logged this week.
               </p>
+              <HabitLogButton habitId={habit.id} />
             </article>
           ))}
         </div>

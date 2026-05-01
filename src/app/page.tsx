@@ -1,6 +1,7 @@
 import { AppShell } from "@/components/app-shell";
 import { Heatmap } from "@/components/heatmap";
 import { QuickCaptureForm } from "@/components/quick-capture-form";
+import { TaskForm } from "@/components/task-form";
 import { getDashboardSnapshot } from "@/lib/data";
 
 export default async function Home() {
@@ -103,6 +104,7 @@ export default async function Home() {
             </div>
           </div>
           <div className="mt-6 space-y-4">
+            <TaskForm />
             {snapshot.dailyFocus.topTasks.length === 0 ? (
               <div className="rounded-[1.5rem] border border-dashed border-border bg-surface-strong p-5 text-sm text-ink-soft">
                 No tasks scheduled for today yet.

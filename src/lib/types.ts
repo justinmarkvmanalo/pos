@@ -49,6 +49,10 @@ export type CaptureItem = {
 
 export type DashboardSnapshot = {
   isConfigured: boolean;
+  user: {
+    id: string;
+    email: string;
+  } | null;
   dailyFocus: {
     dateLabel: string;
     completedTasks: number;

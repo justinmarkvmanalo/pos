@@ -1,65 +1,28 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useActionState } from "react";
+import { createCaptureAction, initialActionState } from "@/app/actions/data";
+import { RevealForm } from "@/components/reveal-form";
+import { SubmitButton } from "@/components/submit-button";
 import type { CaptureItem } from "@/lib/types";
 
 export function QuickCaptureForm({ captures }: { captures: CaptureItem[] }) {
-  const router = useRouter();
-  const [value, setValue] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [state, formAction] = useActionState(createCaptureAction, initialActionState);
 
   return (
     <div className="mt-5">
-      <form
-        className="flex flex-col gap-3"
-        onSubmit={async (event) => {
-          event.preventDefault();
-
-          const nextValue = value.trim();
-          if (!nextValue) {
-            return;
-          }
-
-          setError(null);
-
-          const response = await fetch("/api/captures", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ body: nextValue }),
-          });
-
-          if (!response.ok) {
-            setError("Capture could not be saved.");
-            return;
-          }
-
-          setValue("");
-          startTransition(() => {
-            router.refresh();
-          });
-        }}
-      >
-        <textarea
-          value={value}
-          onChange={(event) => setValue(event.target.value)}
-          rows={4}
-          placeholder="Dump a thought, task, or link..."
-          className="min-h-28 rounded-[1.25rem] border border-border bg-surface-strong px-4 py-3 text-sm outline-none transition placeholder:text-ink-soft focus:border-accent"
-        />
-        <button
-          type="submit"
-          disabled={isPending}
-          className="inline-flex w-fit rounded-full bg-[#201914] px-5 py-2.5 text-sm font-semibold text-[#fff7ef] transition hover:bg-[#352820]"
-        >
-          {isPending ? "Saving..." : "Save capture"}
-        </button>
-      </form>
-
-      {error ? <p className="mt-3 text-sm text-[#8f2f23]">{error}</p> : null}
+      <RevealForm buttonLabel="Add capture" title="New capture">
+        <form action={formAction} className="flex flex-col gap-3">
+          <textarea
+            name="body"
+            rows={4}
+            placeholder="Dump a thought, task, or link..."
+            className="min-h-28 rounded-[1.25rem] border border-border bg-surface-strong px-4 py-3 text-sm outline-none transition placeholder:text-ink-soft focus:border-accent"
+          />
+          <p className="min-h-5 text-sm text-[#8f2f23]">{state.message}</p>
+          <SubmitButton idleLabel="Save capture" pendingLabel="Saving..." />
+        </form>
+      </RevealForm>
 
       <div className="mt-5 space-y-2">
         {captures.length === 0 ? (
