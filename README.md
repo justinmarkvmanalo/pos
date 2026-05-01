@@ -19,6 +19,7 @@ npm install
 ```
 
 2. Copy `.env.example` to `.env.local` and fill in your Supabase values.
+   You need `SUPABASE_SERVICE_ROLE_KEY` because the app reads and writes through server-side route handlers and Server Components.
 
 3. Run the app:
 
@@ -44,4 +45,4 @@ Run [supabase/schema.sql](/C:/Users/Justin%20Mark/OneDrive/Desktop/pos/supabase/
 
 ## Status
 
-The current UI uses local mock data for immediate usability. The Supabase client helper and schema are in place so the next step is swapping reads and writes from `src/lib/mock-data.ts` to live queries.
+The UI now reads from your live Supabase tables and shows empty states when the database is blank. `POST /api/captures` writes to `captures`, and `GET /api/review` generates and stores a row in `weekly_reviews`.

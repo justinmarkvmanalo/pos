@@ -1,12 +1,14 @@
 import { AppShell } from "@/components/app-shell";
 import { Heatmap } from "@/components/heatmap";
 import { QuickCaptureForm } from "@/components/quick-capture-form";
-import { getDashboardSnapshot } from "@/lib/mock-data";
+import { getDashboardSnapshot } from "@/lib/data";
 
-export default function Home() {
-  const snapshot = getDashboardSnapshot();
+export default async function Home() {
+  const snapshot = await getDashboardSnapshot();
   const completion = Math.round(
-    (snapshot.dailyFocus.completedTasks / snapshot.dailyFocus.topTasks.length) * 100,
+    snapshot.dailyFocus.topTasks.length === 0
+      ? 0
+      : (snapshot.dailyFocus.completedTasks / snapshot.dailyFocus.topTasks.length) * 100,
   );
 
   return (
@@ -27,9 +29,9 @@ export default function Home() {
               </p>
             </div>
             <div className="rounded-[1.5rem] bg-[#201914] px-5 py-4 text-[#fff7ef]">
-              <p className="text-xs uppercase tracking-[0.2em] text-[#d7c6b8]">Morning cue</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-[#d7c6b8]">System note</p>
               <p className="mt-2 max-w-52 text-sm leading-6">
-                {snapshot.dailyFocus.morningMessage}
+                Real data now drives this dashboard. Empty sections stay empty until you add rows.
               </p>
             </div>
           </div>
@@ -39,22 +41,22 @@ export default function Home() {
               <p className="text-sm text-ink-soft">Task completion</p>
               <p className="mt-2 text-3xl font-semibold">{completion}%</p>
               <p className="mt-2 text-sm text-ink-soft">
-                {snapshot.dailyFocus.completedTasks} of {snapshot.dailyFocus.topTasks.length} deep
-                work blocks closed.
+                {snapshot.dailyFocus.completedTasks} of {snapshot.dailyFocus.topTasks.length} focus
+                tasks closed today.
               </p>
             </div>
             <div className="rounded-[1.5rem] bg-surface-strong p-5">
-              <p className="text-sm text-ink-soft">Current streak</p>
-              <p className="mt-2 text-3xl font-semibold">{snapshot.dailyFocus.streakDays} days</p>
+              <p className="text-sm text-ink-soft">Habit hit rate</p>
+              <p className="mt-2 text-3xl font-semibold">{snapshot.habits.completionRate}%</p>
               <p className="mt-2 text-sm text-ink-soft">
-                A visible run rate for the habits you actually care about.
+                Percentage of weekly habit targets completed so far.
               </p>
             </div>
             <div className="rounded-[1.5rem] bg-surface-strong p-5">
-              <p className="text-sm text-ink-soft">Active goals</p>
-              <p className="mt-2 text-3xl font-semibold">{snapshot.goals.length}</p>
+              <p className="text-sm text-ink-soft">Capture inbox</p>
+              <p className="mt-2 text-3xl font-semibold">{snapshot.captures.length}</p>
               <p className="mt-2 text-sm text-ink-soft">
-                Each one broken into milestones with deadline pressure.
+                Recent unarchived captures available for review.
               </p>
             </div>
           </div>
@@ -80,6 +82,11 @@ export default function Home() {
                 {highlight}
               </div>
             ))}
+            {snapshot.review.highlights.length === 0 ? (
+              <div className="rounded-[1.25rem] border border-dashed border-border bg-surface-strong px-4 py-3 text-sm text-ink-soft">
+                No review signals yet.
+              </div>
+            ) : null}
           </div>
         </div>
       </section>
@@ -96,9 +103,14 @@ export default function Home() {
             </div>
           </div>
           <div className="mt-6 space-y-4">
+            {snapshot.dailyFocus.topTasks.length === 0 ? (
+              <div className="rounded-[1.5rem] border border-dashed border-border bg-surface-strong p-5 text-sm text-ink-soft">
+                No tasks scheduled for today yet.
+              </div>
+            ) : null}
             {snapshot.dailyFocus.topTasks.map((task, index) => (
               <div
-                key={task.title}
+                key={task.id}
                 className="rounded-[1.5rem] border border-border bg-surface-strong p-5"
               >
                 <div className="flex items-start justify-between gap-4">
@@ -147,7 +159,7 @@ export default function Home() {
               Fast capture for links, half-formed tasks, and thoughts you do not want to hold in
               working memory.
             </p>
-            <QuickCaptureForm />
+            <QuickCaptureForm captures={snapshot.captures} />
           </div>
         </div>
       </section>

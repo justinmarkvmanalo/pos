@@ -1,26 +1,65 @@
 export type FocusTask = {
+  id: string;
   title: string;
   note: string;
-  energy: "High focus" | "Medium lift" | "Quick win";
+  energy: string;
   done: boolean;
 };
 
+export type GoalMilestone = {
+  id: string;
+  name: string;
+  status: "done" | "active" | "up-next";
+};
+
 export type Goal = {
+  id: string;
   title: string;
-  deadline: string;
+  deadline: string | null;
   progress: number;
   ownerNote: string;
-  milestones: { name: string; status: "done" | "active" | "up-next" }[];
+  milestones: GoalMilestone[];
 };
 
 export type HabitSummary = {
+  id: string;
   name: string;
+  targetFrequency: number;
   currentRun: number;
   completedThisWeek: number;
+};
+
+export type HeatmapEntry = {
+  date: string;
+  value: number;
 };
 
 export type ReviewSummary = {
   readiness: string;
   prompt: string;
   highlights: string[];
+  latestSummary: string | null;
+};
+
+export type CaptureItem = {
+  id: string;
+  body: string;
+  createdAt: string;
+};
+
+export type DashboardSnapshot = {
+  isConfigured: boolean;
+  dailyFocus: {
+    dateLabel: string;
+    completedTasks: number;
+    topTasks: FocusTask[];
+  };
+  goals: Goal[];
+  habits: {
+    completionRate: number;
+    summaries: HabitSummary[];
+    heatmap: HeatmapEntry[];
+  };
+  review: ReviewSummary;
+  captures: CaptureItem[];
 };

@@ -1,7 +1,10 @@
 import { AppShell } from "@/components/app-shell";
 import { QuickCaptureForm } from "@/components/quick-capture-form";
+import { getDashboardSnapshot } from "@/lib/data";
 
-export default function CapturePage() {
+export default async function CapturePage() {
+  const { captures } = await getDashboardSnapshot();
+
   return (
     <AppShell>
       <section className="grid gap-6 lg:grid-cols-[1fr_0.9fr]">
@@ -16,7 +19,7 @@ export default function CapturePage() {
 
         <div className="panel rounded-[2rem] p-6">
           <h2 className="display text-3xl">Inbox</h2>
-          <QuickCaptureForm />
+          <QuickCaptureForm captures={captures} />
         </div>
       </section>
     </AppShell>

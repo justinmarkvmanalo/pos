@@ -1,10 +1,10 @@
 import { AppShell } from "@/components/app-shell";
-import { getDashboardSnapshot } from "@/lib/mock-data";
+import { getDashboardSnapshot } from "@/lib/data";
 import { buildWeeklyReviewText } from "@/lib/review";
 
-export default function ReviewPage() {
-  const { review, goals, habits } = getDashboardSnapshot();
-  const summaryText = buildWeeklyReviewText();
+export default async function ReviewPage() {
+  const { review, goals, habits } = await getDashboardSnapshot();
+  const summaryText = await buildWeeklyReviewText();
 
   return (
     <AppShell>
@@ -16,10 +16,15 @@ export default function ReviewPage() {
 
           <div className="mt-6 rounded-[1.5rem] bg-[#201914] p-5 text-[#fff7ef]">
             <p className="text-xs uppercase tracking-[0.18em] text-[#d7c6b8]">Auto-summary draft</p>
-            <p className="mt-3 text-sm leading-7">{summaryText}</p>
+            <p className="mt-3 text-sm leading-7">{review.latestSummary ?? summaryText}</p>
           </div>
 
           <div className="mt-6 space-y-3">
+            {review.highlights.length === 0 ? (
+              <div className="rounded-[1.25rem] border border-dashed border-border bg-surface-strong p-4 text-sm text-ink-soft">
+                No review highlights yet.
+              </div>
+            ) : null}
             {review.highlights.map((item) => (
               <div key={item} className="rounded-[1.25rem] border border-border bg-surface-strong p-4">
                 {item}
@@ -32,8 +37,13 @@ export default function ReviewPage() {
           <article className="panel rounded-[2rem] p-6">
             <p className="text-sm uppercase tracking-[0.16em] text-ink-soft">Goal pulse</p>
             <div className="mt-4 space-y-3">
+              {goals.length === 0 ? (
+                <div className="rounded-[1.25rem] bg-surface-strong p-4 text-sm text-ink-soft">
+                  No goals yet.
+                </div>
+              ) : null}
               {goals.map((goal) => (
-                <div key={goal.title} className="rounded-[1.25rem] bg-surface-strong p-4">
+                <div key={goal.id} className="rounded-[1.25rem] bg-surface-strong p-4">
                   <div className="flex items-center justify-between gap-4">
                     <p className="text-sm font-medium">{goal.title}</p>
                     <span className="text-sm text-ink-soft">{goal.progress}%</span>
@@ -46,11 +56,18 @@ export default function ReviewPage() {
           <article className="panel rounded-[2rem] p-6">
             <p className="text-sm uppercase tracking-[0.16em] text-ink-soft">Habit pulse</p>
             <div className="mt-4 space-y-3">
+              {habits.summaries.length === 0 ? (
+                <div className="rounded-[1.25rem] bg-surface-strong p-4 text-sm text-ink-soft">
+                  No habit activity yet.
+                </div>
+              ) : null}
               {habits.summaries.map((habit) => (
-                <div key={habit.name} className="rounded-[1.25rem] bg-surface-strong p-4">
+                <div key={habit.id} className="rounded-[1.25rem] bg-surface-strong p-4">
                   <div className="flex items-center justify-between gap-4">
                     <p className="text-sm font-medium">{habit.name}</p>
-                    <span className="text-sm text-ink-soft">{habit.completedThisWeek}/7</span>
+                    <span className="text-sm text-ink-soft">
+                      {habit.completedThisWeek}/{habit.targetFrequency}
+                    </span>
                   </div>
                 </div>
               ))}

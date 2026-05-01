@@ -1,22 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import type { CaptureItem } from "@/lib/types";
 
-const seedCaptures = [
-  "Podcast idea: private dashboard walkthrough",
-  "Renew Vercel project env vars before Friday",
-  "Link: article on deliberate practice and streak psychology",
-];
-
-export function QuickCaptureForm() {
+export function QuickCaptureForm({ captures }: { captures: CaptureItem[] }) {
+  const router = useRouter();
   const [value, setValue] = useState("");
-  const [captures, setCaptures] = useState(seedCaptures);
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   return (
     <div className="mt-5">
       <form
         className="flex flex-col gap-3"
-        onSubmit={(event) => {
+        onSubmit={async (event) => {
           event.preventDefault();
 
           const nextValue = value.trim();
@@ -24,8 +22,25 @@ export function QuickCaptureForm() {
             return;
           }
 
-          setCaptures((current) => [nextValue, ...current].slice(0, 5));
+          setError(null);
+
+          const response = await fetch("/api/captures", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ body: nextValue }),
+          });
+
+          if (!response.ok) {
+            setError("Capture could not be saved.");
+            return;
+          }
+
           setValue("");
+          startTransition(() => {
+            router.refresh();
+          });
         }}
       >
         <textarea
@@ -37,19 +52,27 @@ export function QuickCaptureForm() {
         />
         <button
           type="submit"
+          disabled={isPending}
           className="inline-flex w-fit rounded-full bg-[#201914] px-5 py-2.5 text-sm font-semibold text-[#fff7ef] transition hover:bg-[#352820]"
         >
-          Save capture
+          {isPending ? "Saving..." : "Save capture"}
         </button>
       </form>
 
+      {error ? <p className="mt-3 text-sm text-[#8f2f23]">{error}</p> : null}
+
       <div className="mt-5 space-y-2">
+        {captures.length === 0 ? (
+          <div className="rounded-[1rem] border border-dashed border-border bg-[#fff8ef] px-4 py-3 text-sm text-ink-soft">
+            No captures yet.
+          </div>
+        ) : null}
         {captures.map((capture) => (
           <div
-            key={capture}
+            key={capture.id}
             className="rounded-[1rem] border border-border bg-[#fff8ef] px-4 py-3 text-sm text-foreground"
           >
-            {capture}
+            {capture.body}
           </div>
         ))}
       </div>

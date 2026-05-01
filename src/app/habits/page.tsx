@@ -1,9 +1,9 @@
 import { AppShell } from "@/components/app-shell";
 import { Heatmap } from "@/components/heatmap";
-import { getDashboardSnapshot } from "@/lib/mock-data";
+import { getDashboardSnapshot } from "@/lib/data";
 
-export default function HabitsPage() {
-  const { habits } = getDashboardSnapshot();
+export default async function HabitsPage() {
+  const { habits } = await getDashboardSnapshot();
 
   return (
     <AppShell>
@@ -19,8 +19,13 @@ export default function HabitsPage() {
         </div>
 
         <div className="grid gap-6">
+          {habits.summaries.length === 0 ? (
+            <article className="panel rounded-[2rem] p-6 text-sm text-ink-soft">
+              No habits yet. Add rows to `habits` and `habit_logs` to populate this page.
+            </article>
+          ) : null}
           {habits.summaries.map((habit) => (
-            <article key={habit.name} className="panel rounded-[2rem] p-6">
+            <article key={habit.id} className="panel rounded-[2rem] p-6">
               <p className="text-sm uppercase tracking-[0.16em] text-ink-soft">{habit.name}</p>
               <p className="mt-3 text-4xl font-semibold">{habit.currentRun} days</p>
               <p className="mt-2 text-sm text-ink-soft">
