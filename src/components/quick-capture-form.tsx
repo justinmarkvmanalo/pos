@@ -1,13 +1,14 @@
 "use client";
 
 import { useActionState } from "react";
-import { createCaptureAction, initialActionState } from "@/app/actions/data";
+import { createCaptureAction } from "@/app/actions/data";
 import { RevealForm } from "@/components/reveal-form";
 import { SubmitButton } from "@/components/submit-button";
+import { emptyActionState } from "@/lib/form-state";
 import type { CaptureItem } from "@/lib/types";
 
 export function QuickCaptureForm({ captures }: { captures: CaptureItem[] }) {
-  const [state, formAction] = useActionState(createCaptureAction, initialActionState);
+  const [state, formAction] = useActionState(createCaptureAction, emptyActionState);
 
   return (
     <div className="mt-5">

@@ -2,15 +2,8 @@
 
 import { redirect } from "next/navigation";
 import { clearAuthSession, getOptionalUser, setAuthSession } from "@/lib/auth";
+import type { ActionState } from "@/lib/form-state";
 import { getSupabaseAuthClient } from "@/lib/supabase";
-
-export type ActionState = {
-  message: string;
-};
-
-const initialState: ActionState = {
-  message: "",
-};
 
 function getTrimmedField(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
@@ -95,5 +88,3 @@ export async function redirectIfLoggedIn() {
     redirect("/");
   }
 }
-
-export { initialState as authInitialState };

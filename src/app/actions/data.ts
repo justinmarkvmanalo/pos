@@ -3,16 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { requireAuthContext } from "@/lib/auth";
 import { getCurrentWeekIso } from "@/lib/data";
+import type { ActionState } from "@/lib/form-state";
 import { buildWeeklyReviewText } from "@/lib/review";
 import { getSupabaseUserServerClient } from "@/lib/supabase";
-
-export type ActionState = {
-  message: string;
-};
-
-export const initialActionState: ActionState = {
-  message: "",
-};
 
 async function getSupabaseOrThrow() {
   const auth = await requireAuthContext();

@@ -1,12 +1,13 @@
 "use client";
 
 import { useActionState } from "react";
-import { createTaskAction, initialActionState } from "@/app/actions/data";
+import { createTaskAction } from "@/app/actions/data";
 import { RevealForm } from "@/components/reveal-form";
 import { SubmitButton } from "@/components/submit-button";
+import { emptyActionState } from "@/lib/form-state";
 
 export function TaskForm() {
-  const [state, formAction] = useActionState(createTaskAction, initialActionState);
+  const [state, formAction] = useActionState(createTaskAction, emptyActionState);
   const today = new Date().toISOString().slice(0, 10);
 
   return (

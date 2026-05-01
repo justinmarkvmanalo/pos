@@ -1,12 +1,13 @@
 "use client";
 
 import { useActionState } from "react";
-import { createGoalAction, initialActionState } from "@/app/actions/data";
+import { createGoalAction } from "@/app/actions/data";
 import { RevealForm } from "@/components/reveal-form";
 import { SubmitButton } from "@/components/submit-button";
+import { emptyActionState } from "@/lib/form-state";
 
 export function GoalForm() {
-  const [state, formAction] = useActionState(createGoalAction, initialActionState);
+  const [state, formAction] = useActionState(createGoalAction, emptyActionState);
 
   return (
     <RevealForm buttonLabel="Add goal" title="New goal">

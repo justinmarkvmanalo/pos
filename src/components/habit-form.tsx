@@ -1,12 +1,13 @@
 "use client";
 
 import { useActionState } from "react";
-import { createHabitAction, initialActionState } from "@/app/actions/data";
+import { createHabitAction } from "@/app/actions/data";
 import { RevealForm } from "@/components/reveal-form";
 import { SubmitButton } from "@/components/submit-button";
+import { emptyActionState } from "@/lib/form-state";
 
 export function HabitForm() {
-  const [state, formAction] = useActionState(createHabitAction, initialActionState);
+  const [state, formAction] = useActionState(createHabitAction, emptyActionState);
 
   return (
     <RevealForm buttonLabel="Add habit" title="New habit">

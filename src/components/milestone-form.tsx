@@ -1,12 +1,13 @@
 "use client";
 
 import { useActionState } from "react";
-import { createMilestoneAction, initialActionState } from "@/app/actions/data";
+import { createMilestoneAction } from "@/app/actions/data";
 import { RevealForm } from "@/components/reveal-form";
 import { SubmitButton } from "@/components/submit-button";
+import { emptyActionState } from "@/lib/form-state";
 
 export function MilestoneForm({ goalId }: { goalId: string }) {
-  const [state, formAction] = useActionState(createMilestoneAction, initialActionState);
+  const [state, formAction] = useActionState(createMilestoneAction, emptyActionState);
 
   return (
     <RevealForm buttonLabel="Add milestone" title="New milestone">

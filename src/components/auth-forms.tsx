@@ -2,13 +2,9 @@
 
 import type { ReactNode } from "react";
 import { useActionState } from "react";
-import {
-  authInitialState,
-  loginAction,
-  signupAction,
-  type ActionState,
-} from "@/app/actions/auth";
+import { loginAction, signupAction } from "@/app/actions/auth";
 import { SubmitButton } from "@/components/submit-button";
+import { emptyActionState, type ActionState } from "@/lib/form-state";
 
 function AuthCard({
   title,
@@ -21,7 +17,7 @@ function AuthCard({
   action: (state: ActionState, formData: FormData) => Promise<ActionState>;
   children: ReactNode;
 }) {
-  const [state, formAction] = useActionState(action, authInitialState);
+  const [state, formAction] = useActionState(action, emptyActionState);
 
   return (
     <div className="panel rounded-[2rem] p-6">
