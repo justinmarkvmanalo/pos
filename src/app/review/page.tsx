@@ -1,9 +1,11 @@
+import { connection } from "next/server";
 import { AppShell } from "@/components/app-shell";
 import { ReviewGenerateButton } from "@/components/review-generate-button";
 import { getDashboardSnapshot } from "@/lib/data";
 import { buildWeeklyReviewText } from "@/lib/review";
 
 export default async function ReviewPage() {
+  await connection();
   const { review, goals, habits } = await getDashboardSnapshot();
   const summaryText = await buildWeeklyReviewText();
 

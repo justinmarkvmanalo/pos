@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { AppShell } from "@/components/app-shell";
 import { Heatmap } from "@/components/heatmap";
 import { QuickCaptureForm } from "@/components/quick-capture-form";
@@ -5,6 +6,7 @@ import { TaskForm } from "@/components/task-form";
 import { getDashboardSnapshot } from "@/lib/data";
 
 export default async function Home() {
+  await connection();
   const snapshot = await getDashboardSnapshot();
   const completion = Math.round(
     snapshot.dailyFocus.topTasks.length === 0

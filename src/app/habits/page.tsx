@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { AppShell } from "@/components/app-shell";
 import { HabitForm } from "@/components/habit-form";
 import { Heatmap } from "@/components/heatmap";
@@ -5,6 +6,7 @@ import { HabitLogButton } from "@/components/habit-log-button";
 import { getDashboardSnapshot } from "@/lib/data";
 
 export default async function HabitsPage() {
+  await connection();
   const { habits } = await getDashboardSnapshot();
 
   return (

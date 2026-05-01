@@ -1,8 +1,10 @@
+import { connection } from "next/server";
 import { AppShell } from "@/components/app-shell";
 import { QuickCaptureForm } from "@/components/quick-capture-form";
 import { getDashboardSnapshot } from "@/lib/data";
 
 export default async function CapturePage() {
+  await connection();
   const { captures } = await getDashboardSnapshot();
 
   return (

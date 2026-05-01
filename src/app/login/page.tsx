@@ -1,9 +1,11 @@
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { AuthForms } from "@/components/auth-forms";
 import { getOptionalUser } from "@/lib/auth";
 import { hasSupabaseEnv } from "@/lib/supabase";
 
 export default async function LoginPage() {
+  await connection();
   const user = await getOptionalUser();
   if (user) {
     redirect("/");

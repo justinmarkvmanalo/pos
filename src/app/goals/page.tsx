@@ -1,9 +1,11 @@
+import { connection } from "next/server";
 import { AppShell } from "@/components/app-shell";
 import { GoalForm } from "@/components/goal-form";
 import { MilestoneForm } from "@/components/milestone-form";
 import { getDashboardSnapshot } from "@/lib/data";
 
 export default async function GoalsPage() {
+  await connection();
   const { goals } = await getDashboardSnapshot();
 
   return (
