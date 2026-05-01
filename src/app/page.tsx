@@ -1,65 +1,156 @@
-import Image from "next/image";
+import { AppShell } from "@/components/app-shell";
+import { Heatmap } from "@/components/heatmap";
+import { QuickCaptureForm } from "@/components/quick-capture-form";
+import { getDashboardSnapshot } from "@/lib/mock-data";
 
 export default function Home() {
+  const snapshot = getDashboardSnapshot();
+  const completion = Math.round(
+    (snapshot.dailyFocus.completedTasks / snapshot.dailyFocus.topTasks.length) * 100,
+  );
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <AppShell>
+      <section className="fade-up grid gap-6 xl:grid-cols-[1.4fr_0.9fr]">
+        <div className="panel rounded-[2rem] p-6 sm:p-8">
+          <p className="text-sm uppercase tracking-[0.3em] text-ink-soft">
+            Personal command center
           </p>
+          <div className="mt-4 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl">
+              <h1 className="display text-4xl leading-tight sm:text-5xl">
+                Start with the work that compounds.
+              </h1>
+              <p className="mt-4 max-w-xl text-base leading-7 text-ink-soft sm:text-lg">
+                Your day is pre-trimmed to the three tasks that matter, the habits that
+                keep momentum alive, and the review loop that stops weeks from drifting.
+              </p>
+            </div>
+            <div className="rounded-[1.5rem] bg-[#201914] px-5 py-4 text-[#fff7ef]">
+              <p className="text-xs uppercase tracking-[0.2em] text-[#d7c6b8]">Morning cue</p>
+              <p className="mt-2 max-w-52 text-sm leading-6">
+                {snapshot.dailyFocus.morningMessage}
+              </p>
+            </div>
+          </div>
+
+          <div className="metric-grid mt-8">
+            <div className="rounded-[1.5rem] bg-surface-strong p-5">
+              <p className="text-sm text-ink-soft">Task completion</p>
+              <p className="mt-2 text-3xl font-semibold">{completion}%</p>
+              <p className="mt-2 text-sm text-ink-soft">
+                {snapshot.dailyFocus.completedTasks} of {snapshot.dailyFocus.topTasks.length} deep
+                work blocks closed.
+              </p>
+            </div>
+            <div className="rounded-[1.5rem] bg-surface-strong p-5">
+              <p className="text-sm text-ink-soft">Current streak</p>
+              <p className="mt-2 text-3xl font-semibold">{snapshot.dailyFocus.streakDays} days</p>
+              <p className="mt-2 text-sm text-ink-soft">
+                A visible run rate for the habits you actually care about.
+              </p>
+            </div>
+            <div className="rounded-[1.5rem] bg-surface-strong p-5">
+              <p className="text-sm text-ink-soft">Active goals</p>
+              <p className="mt-2 text-3xl font-semibold">{snapshot.goals.length}</p>
+              <p className="mt-2 text-sm text-ink-soft">
+                Each one broken into milestones with deadline pressure.
+              </p>
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="panel fade-up-delay rounded-[2rem] p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm uppercase tracking-[0.2em] text-ink-soft">Weekly review</p>
+              <h2 className="display mt-2 text-3xl">Friday reset</h2>
+            </div>
+            <div className="rounded-full bg-accent-soft px-3 py-1 text-sm font-medium text-accent-strong">
+              {snapshot.review.readiness}
+            </div>
+          </div>
+          <p className="mt-4 text-sm leading-6 text-ink-soft">{snapshot.review.prompt}</p>
+          <div className="mt-6 space-y-3">
+            {snapshot.review.highlights.map((highlight) => (
+              <div
+                key={highlight}
+                className="rounded-[1.25rem] border border-border bg-surface-strong px-4 py-3 text-sm"
+              >
+                {highlight}
+              </div>
+            ))}
+          </div>
         </div>
-      </main>
-    </div>
+      </section>
+
+      <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="panel rounded-[2rem] p-6 sm:p-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm uppercase tracking-[0.2em] text-ink-soft">Daily focus</p>
+              <h2 className="display mt-2 text-3xl">Top 3 for today</h2>
+            </div>
+            <div className="rounded-full border border-border px-3 py-1 text-sm text-ink-soft">
+              {snapshot.dailyFocus.dateLabel}
+            </div>
+          </div>
+          <div className="mt-6 space-y-4">
+            {snapshot.dailyFocus.topTasks.map((task, index) => (
+              <div
+                key={task.title}
+                className="rounded-[1.5rem] border border-border bg-surface-strong p-5"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.2em] text-ink-soft">
+                      Focus block {index + 1}
+                    </p>
+                    <h3 className="mt-2 text-xl font-semibold">{task.title}</h3>
+                    <p className="mt-2 text-sm leading-6 text-ink-soft">{task.note}</p>
+                  </div>
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${
+                      task.done
+                        ? "bg-[#d7eadf] text-success"
+                        : "bg-accent-soft text-accent-strong"
+                    }`}
+                  >
+                    {task.done ? "Done" : task.energy}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid gap-6">
+          <div className="panel rounded-[2rem] p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm uppercase tracking-[0.2em] text-ink-soft">Habit logger</p>
+                <h2 className="display mt-2 text-3xl">Consistency map</h2>
+              </div>
+              <p className="text-sm text-ink-soft">{snapshot.habits.completionRate}% hit rate</p>
+            </div>
+            <Heatmap entries={snapshot.habits.heatmap} />
+          </div>
+
+          <div className="panel rounded-[2rem] p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm uppercase tracking-[0.2em] text-ink-soft">Quick capture</p>
+                <h2 className="display mt-2 text-3xl">Dump first, sort later</h2>
+              </div>
+            </div>
+            <p className="mt-3 text-sm leading-6 text-ink-soft">
+              Fast capture for links, half-formed tasks, and thoughts you do not want to hold in
+              working memory.
+            </p>
+            <QuickCaptureForm />
+          </div>
+        </div>
+      </section>
+    </AppShell>
   );
 }
