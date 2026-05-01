@@ -14,7 +14,10 @@ async function getSupabaseOrThrow() {
     throw new Error("Supabase is not configured.");
   }
 
-  return supabase;
+  return {
+    supabase,
+    userId: auth.user.id,
+  };
 }
 
 function getTrimmedField(formData: FormData, key: string) {
@@ -33,7 +36,7 @@ export async function createTaskAction(
   _: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const supabase = await getSupabaseOrThrow();
+  const { supabase, userId } = await getSupabaseOrThrow();
 
   const title = getTrimmedField(formData, "title");
   const note = getTrimmedField(formData, "note");
@@ -46,6 +49,7 @@ export async function createTaskAction(
   }
 
   const { error } = await supabase.from("tasks").insert({
+    owner_id: userId,
     title,
     note,
     energy,
@@ -65,7 +69,7 @@ export async function createGoalAction(
   _: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const supabase = await getSupabaseOrThrow();
+  const { supabase, userId } = await getSupabaseOrThrow();
 
   const title = getTrimmedField(formData, "title");
   const ownerNote = getTrimmedField(formData, "owner_note");
@@ -77,6 +81,7 @@ export async function createGoalAction(
   }
 
   const { error } = await supabase.from("goals").insert({
+    owner_id: userId,
     title,
     owner_note: ownerNote,
     deadline,
@@ -95,7 +100,7 @@ export async function createMilestoneAction(
   _: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const supabase = await getSupabaseOrThrow();
+  const { supabase, userId } = await getSupabaseOrThrow();
 
   const goalId = getTrimmedField(formData, "goal_id");
   const name = getTrimmedField(formData, "name");
@@ -117,6 +122,7 @@ export async function createMilestoneAction(
   }
 
   const { error } = await supabase.from("milestones").insert({
+    owner_id: userId,
     goal_id: goalId,
     name,
     status,
@@ -135,7 +141,7 @@ export async function createHabitAction(
   _: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const supabase = await getSupabaseOrThrow();
+  const { supabase, userId } = await getSupabaseOrThrow();
 
   const name = getTrimmedField(formData, "name");
   const targetFrequency = Number(formData.get("target_frequency") ?? 7);
@@ -145,6 +151,7 @@ export async function createHabitAction(
   }
 
   const { error } = await supabase.from("habits").insert({
+    owner_id: userId,
     name,
     target_frequency: targetFrequency,
   });
@@ -158,7 +165,7 @@ export async function createHabitAction(
 }
 
 export async function logHabitAction(formData: FormData) {
-  const supabase = await getSupabaseOrThrow();
+  const { supabase, userId } = await getSupabaseOrThrow();
 
   const habitId = getTrimmedField(formData, "habit_id");
   const completedOn = getTrimmedField(formData, "completed_on") || new Date().toISOString().slice(0, 10);
@@ -175,6 +182,7 @@ export async function logHabitAction(formData: FormData) {
 
   await supabase.from("habit_logs").upsert(
     {
+      owner_id: userId,
       habit_id: habitId,
       completed_on: completedOn,
       completed: true,
@@ -191,7 +199,7 @@ export async function createCaptureAction(
   _: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const supabase = await getSupabaseOrThrow();
+  const { supabase, userId } = await getSupabaseOrThrow();
 
   const body = getTrimmedField(formData, "body");
 
@@ -200,6 +208,7 @@ export async function createCaptureAction(
   }
 
   const { error } = await supabase.from("captures").insert({
+    owner_id: userId,
     body,
     source: "manual",
     archived: false,
@@ -214,13 +223,12 @@ export async function createCaptureAction(
 }
 
 export async function generateReviewAction() {
-  const auth = await requireAuthContext();
-  const supabase = await getSupabaseOrThrow();
+  const { supabase, userId } = await getSupabaseOrThrow();
   const summary = await buildWeeklyReviewText();
 
   await supabase.from("weekly_reviews").upsert(
     {
-      owner_id: auth.user.id,
+      owner_id: userId,
       week_of: getCurrentWeekIso(),
       summary,
       prompt:
