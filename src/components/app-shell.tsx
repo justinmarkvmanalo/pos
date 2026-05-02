@@ -1,21 +1,15 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { logoutAction } from "@/app/actions/auth";
+import { navigation } from "@/components/app-navigation";
+import { MobileNav } from "@/components/mobile-nav";
 import { getOptionalUser } from "@/lib/auth";
-
-const navigation = [
-  { href: "/", label: "Dashboard" },
-  { href: "/goals", label: "Goals" },
-  { href: "/habits", label: "Habits" },
-  { href: "/capture", label: "Capture" },
-  { href: "/review", label: "Review" },
-];
 
 export async function AppShell({ children }: { children: ReactNode }) {
   const user = await getOptionalUser();
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-5 sm:px-6 lg:px-8">
+    <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-5 pb-24 sm:px-6 md:pb-5 lg:px-8">
       <header className="panel sticky top-4 z-10 rounded-[1.75rem] px-5 py-4">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
@@ -23,7 +17,7 @@ export async function AppShell({ children }: { children: ReactNode }) {
             <p className="display mt-1 text-2xl">Personal Command Center</p>
           </div>
           <div className="flex flex-col gap-3 lg:items-end">
-            <nav className="flex flex-wrap gap-2">
+            <nav className="hidden flex-wrap gap-2 md:flex">
               {navigation.map((item) => (
                 <Link
                   key={item.href}
@@ -52,6 +46,7 @@ export async function AppShell({ children }: { children: ReactNode }) {
       </header>
 
       <main className="flex flex-1 flex-col gap-6 py-6">{children}</main>
+      <MobileNav />
     </div>
   );
 }
