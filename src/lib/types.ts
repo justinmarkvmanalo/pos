@@ -18,6 +18,9 @@ export type Goal = {
   deadline: string | null;
   progress: number;
   ownerNote: string;
+  completedMilestones: number;
+  totalMilestones: number;
+  currentMilestone: string | null;
   milestones: GoalMilestone[];
 };
 

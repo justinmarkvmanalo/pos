@@ -24,6 +24,87 @@ function getTrimmedField(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
 }
 
+function calculateGoalProgress(statuses: string[]) {
+  if (statuses.length === 0) {
+    return 0;
+  }
+
+  const completedCount = statuses.filter((status) => status === "done").length;
+  return Math.round((completedCount / statuses.length) * 100);
+}
+
+async function syncGoalProgress(supabase: Awaited<ReturnType<typeof getSupabaseOrThrow>>["supabase"], goalId: string) {
+  const { data: milestones, error } = await supabase
+    .from("milestones")
+    .select("status")
+    .eq("goal_id", goalId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const progress = calculateGoalProgress((milestones ?? []).map((milestone) => milestone.status));
+  const { error: updateError } = await supabase.from("goals").update({ progress }).eq("id", goalId);
+
+  if (updateError) {
+    throw new Error(updateError.message);
+  }
+}
+
+type MilestoneRecord = {
+  id: string;
+  status: "done" | "active" | "up-next";
+  sort_order: number;
+};
+
+function normalizeMilestoneStatuses(
+  milestones: MilestoneRecord[],
+  milestoneId: string,
+  nextStatus: MilestoneRecord["status"],
+) {
+  const nextMilestones = milestones.map((milestone) => {
+    if (milestone.id !== milestoneId) {
+      return { ...milestone };
+    }
+
+    return {
+      ...milestone,
+      status: nextStatus,
+    };
+  });
+
+  if (nextStatus === "active") {
+    for (const milestone of nextMilestones) {
+      if (milestone.id !== milestoneId && milestone.status === "active") {
+        milestone.status = "up-next";
+      }
+    }
+  }
+
+  const activeMilestones = nextMilestones.filter((milestone) => milestone.status === "active");
+  if (activeMilestones.length > 1) {
+    const [firstActive, ...rest] = activeMilestones.sort((left, right) => left.sort_order - right.sort_order);
+    for (const milestone of rest) {
+      if (milestone.id !== firstActive.id) {
+        milestone.status = "up-next";
+      }
+    }
+  }
+
+  const hasActiveMilestone = nextMilestones.some((milestone) => milestone.status === "active");
+  if (!hasActiveMilestone) {
+    const nextAvailableMilestone = [...nextMilestones]
+      .sort((left, right) => left.sort_order - right.sort_order)
+      .find((milestone) => milestone.status !== "done");
+
+    if (nextAvailableMilestone) {
+      nextAvailableMilestone.status = "active";
+    }
+  }
+
+  return nextMilestones;
+}
+
 function revalidateApp() {
   revalidatePath("/");
   revalidatePath("/goals");
@@ -74,7 +155,6 @@ export async function createGoalAction(
   const title = getTrimmedField(formData, "title");
   const ownerNote = getTrimmedField(formData, "owner_note");
   const deadline = getTrimmedField(formData, "deadline") || null;
-  const progress = Number(formData.get("progress") ?? 0);
 
   if (!title) {
     return { message: "Goal title is required." };
@@ -85,7 +165,7 @@ export async function createGoalAction(
     title,
     owner_note: ownerNote,
     deadline,
-    progress,
+    progress: 0,
   });
 
   if (error) {
@@ -104,8 +184,6 @@ export async function createMilestoneAction(
 
   const goalId = getTrimmedField(formData, "goal_id");
   const name = getTrimmedField(formData, "name");
-  const status = getTrimmedField(formData, "status") || "up-next";
-  const sortOrder = Number(formData.get("sort_order") ?? 1);
 
   if (!goalId || !name) {
     return { message: "Goal and milestone name are required." };
@@ -121,6 +199,20 @@ export async function createMilestoneAction(
     return { message: "Goal not found." };
   }
 
+  const { data: existingMilestones, error: milestonesError } = await supabase
+    .from("milestones")
+    .select("id,status,sort_order")
+    .eq("goal_id", goalId)
+    .order("sort_order", { ascending: true });
+
+  if (milestonesError) {
+    return { message: milestonesError.message };
+  }
+
+  const milestoneCount = existingMilestones?.length ?? 0;
+  const status = milestoneCount === 0 ? "active" : "up-next";
+  const sortOrder = milestoneCount + 1;
+
   const { error } = await supabase.from("milestones").insert({
     owner_id: userId,
     goal_id: goalId,
@@ -133,8 +225,61 @@ export async function createMilestoneAction(
     return { message: error.message };
   }
 
+  await syncGoalProgress(supabase, goalId);
+
   revalidateApp();
   return { message: "Milestone added." };
+}
+
+export async function updateMilestoneStatusAction(formData: FormData) {
+  const { supabase } = await getSupabaseOrThrow();
+
+  const milestoneId = getTrimmedField(formData, "milestone_id");
+  const nextStatus = getTrimmedField(formData, "status") as MilestoneRecord["status"];
+  const allowedStatuses: MilestoneRecord["status"][] = ["up-next", "active", "done"];
+
+  if (!milestoneId || !allowedStatuses.includes(nextStatus)) {
+    return;
+  }
+
+  const { data: milestone, error: milestoneError } = await supabase
+    .from("milestones")
+    .select("id,goal_id")
+    .eq("id", milestoneId)
+    .maybeSingle();
+
+  if (milestoneError || !milestone) {
+    return;
+  }
+
+  const { data: milestones, error } = await supabase
+    .from("milestones")
+    .select("id,status,sort_order")
+    .eq("goal_id", milestone.goal_id)
+    .order("sort_order", { ascending: true });
+
+  if (error || !milestones) {
+    return;
+  }
+
+  const normalizedMilestones = normalizeMilestoneStatuses(
+    milestones as MilestoneRecord[],
+    milestoneId,
+    nextStatus,
+  );
+
+  await Promise.all(
+    normalizedMilestones.map(async ({ id, status }) => {
+      const { error: updateError } = await supabase.from("milestones").update({ status }).eq("id", id);
+      if (updateError) {
+        throw new Error(updateError.message);
+      }
+    }),
+  );
+
+  await syncGoalProgress(supabase, milestone.goal_id);
+
+  revalidateApp();
 }
 
 export async function createHabitAction(
@@ -144,7 +289,10 @@ export async function createHabitAction(
   const { supabase, userId } = await getSupabaseOrThrow();
 
   const name = getTrimmedField(formData, "name");
-  const targetFrequency = Number(formData.get("target_frequency") ?? 7);
+  const rawTargetFrequency = Number(formData.get("target_frequency") ?? 7);
+  const targetFrequency = Number.isFinite(rawTargetFrequency)
+    ? Math.min(7, Math.max(1, Math.round(rawTargetFrequency)))
+    : 7;
 
   if (!name) {
     return { message: "Habit name is required." };

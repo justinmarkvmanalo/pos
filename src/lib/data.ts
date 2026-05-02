@@ -152,14 +152,29 @@ function buildGoals(goals: GoalRow[], milestones: MilestoneRow[]) {
     milestoneMap.set(milestone.goal_id, current);
   }
 
-  return goals.map((goal) => ({
-    id: goal.id,
-    title: goal.title,
-    deadline: formatDeadline(goal.deadline),
-    progress: goal.progress,
-    ownerNote: goal.owner_note,
-    milestones: milestoneMap.get(goal.id) ?? [],
-  })) satisfies Goal[];
+  return goals.map((goal) => {
+    const milestonesForGoal = milestoneMap.get(goal.id) ?? [];
+    const completedMilestones = milestonesForGoal.filter((milestone) => milestone.status === "done").length;
+    const totalMilestones = milestonesForGoal.length;
+    const activeMilestone =
+      milestonesForGoal.find((milestone) => milestone.status === "active") ??
+      milestonesForGoal.find((milestone) => milestone.status !== "done") ??
+      null;
+    const progress =
+      totalMilestones === 0 ? 0 : Math.round((completedMilestones / totalMilestones) * 100);
+
+    return {
+      id: goal.id,
+      title: goal.title,
+      deadline: formatDeadline(goal.deadline),
+      progress,
+      ownerNote: goal.owner_note,
+      completedMilestones,
+      totalMilestones,
+      currentMilestone: activeMilestone?.name ?? null,
+      milestones: milestonesForGoal,
+    };
+  }) satisfies Goal[];
 }
 
 function buildHabitSummaries(habits: HabitRow[], logs: HabitLogRow[]) {

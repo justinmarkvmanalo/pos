@@ -30,14 +30,9 @@ export function GoalForm() {
             name="deadline"
             className="rounded-[1rem] border border-border bg-[#fff8ef] px-4 py-3 text-sm outline-none focus:border-accent"
           />
-          <input
-            type="number"
-            name="progress"
-            min="0"
-            max="100"
-            defaultValue="0"
-            className="rounded-[1rem] border border-border bg-[#fff8ef] px-4 py-3 text-sm outline-none focus:border-accent"
-          />
+          <div className="rounded-[1rem] border border-dashed border-border bg-[#fff8ef] px-4 py-3 text-sm text-ink-soft">
+            Progress is automatic from milestone completion.
+          </div>
         </div>
         <p className="min-h-5 text-sm text-[#8f2f23]">{state.message}</p>
         <SubmitButton idleLabel="Save goal" pendingLabel="Saving..." />
