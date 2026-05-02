@@ -48,6 +48,15 @@ body {
     linear-gradient(180deg, #f9f1e2 0%, #f3ebdd 48%, #efe5d5 100%);
 }
 
+body :is(main, section, article, header, nav, div, form) {
+  min-width: 0;
+}
+
+body :is(h1, h2, h3, p, span, a, button, label, textarea) {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 a {
   color: inherit;
   text-decoration: none;
