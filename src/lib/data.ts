@@ -1,5 +1,6 @@
 import { cache } from "react";
 import { requireAuthContext } from "@/lib/auth";
+import { getGoalSuggestions } from "@/lib/goal-suggestions";
 import { getSupabaseUserServerClient, hasSupabaseEnv } from "@/lib/supabase";
 import type {
   CaptureItem,
@@ -173,6 +174,11 @@ function buildGoals(goals: GoalRow[], milestones: MilestoneRow[]) {
       totalMilestones,
       currentMilestone: activeMilestone?.name ?? null,
       milestones: milestonesForGoal,
+      suggestions: getGoalSuggestions(
+        goal.title,
+        goal.owner_note,
+        milestonesForGoal.map((milestone) => milestone.name),
+      ),
     };
   }) satisfies Goal[];
 }

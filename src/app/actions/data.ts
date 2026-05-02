@@ -231,6 +231,10 @@ export async function createMilestoneAction(
   return { message: "Milestone added." };
 }
 
+export async function createSuggestedMilestoneAction(formData: FormData) {
+  await createMilestoneAction({ message: "" }, formData);
+}
+
 export async function updateMilestoneStatusAction(formData: FormData) {
   const { supabase } = await getSupabaseOrThrow();
 

@@ -22,6 +22,7 @@ export type Goal = {
   totalMilestones: number;
   currentMilestone: string | null;
   milestones: GoalMilestone[];
+  suggestions: string[];
 };
 
 export type HabitSummary = {
