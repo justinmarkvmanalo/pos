@@ -17,7 +17,7 @@ export default async function Home() {
   return (
     <AppShell>
       <section className="fade-up grid gap-6 xl:grid-cols-[1.4fr_0.9fr]">
-        <div className="panel rounded-[2rem] p-6 sm:p-8">
+        <div className="panel-raised rounded-[2rem] p-6 sm:p-8">
           <p className="text-sm uppercase tracking-[0.3em] text-ink-soft">
             Personal command center
           </p>
@@ -31,7 +31,7 @@ export default async function Home() {
                 keep momentum alive, and the review loop that stops weeks from drifting.
               </p>
             </div>
-            <div className="rounded-[1.5rem] bg-[#201914] px-5 py-4 text-[#fff7ef]">
+            <div className="glow-pulse rounded-[1.5rem] bg-[linear-gradient(145deg,#201914_0%,#3b2d25_100%)] px-5 py-4 text-[#fff7ef]">
               <p className="text-xs uppercase tracking-[0.2em] text-[#d7c6b8]">System note</p>
               <p className="mt-2 max-w-52 text-sm leading-6">
                 Real data now drives this dashboard. Empty sections stay empty until you add rows.
@@ -40,7 +40,7 @@ export default async function Home() {
           </div>
 
           <div className="metric-grid mt-8">
-            <div className="rounded-[1.5rem] bg-surface-strong p-5">
+            <div className="soft-enter rounded-[1.5rem] bg-[rgba(255,251,245,0.88)] p-5">
               <p className="text-sm text-ink-soft">Task completion</p>
               <p className="mt-2 text-3xl font-semibold">{completion}%</p>
               <p className="mt-2 text-sm text-ink-soft">
@@ -48,14 +48,14 @@ export default async function Home() {
                 tasks closed today.
               </p>
             </div>
-            <div className="rounded-[1.5rem] bg-surface-strong p-5">
+            <div className="soft-enter rounded-[1.5rem] bg-[rgba(255,251,245,0.88)] p-5">
               <p className="text-sm text-ink-soft">Habit hit rate</p>
               <p className="mt-2 text-3xl font-semibold">{snapshot.habits.completionRate}%</p>
               <p className="mt-2 text-sm text-ink-soft">
                 Percentage of weekly habit targets completed so far.
               </p>
             </div>
-            <div className="rounded-[1.5rem] bg-surface-strong p-5">
+            <div className="soft-enter rounded-[1.5rem] bg-[rgba(255,251,245,0.88)] p-5">
               <p className="text-sm text-ink-soft">Capture inbox</p>
               <p className="mt-2 text-3xl font-semibold">{snapshot.captures.length}</p>
               <p className="mt-2 text-sm text-ink-soft">
@@ -65,7 +65,7 @@ export default async function Home() {
           </div>
         </div>
 
-        <div className="panel fade-up-delay rounded-[2rem] p-6">
+        <div className="panel-raised fade-up-delay rounded-[2rem] p-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm uppercase tracking-[0.2em] text-ink-soft">Weekly review</p>
@@ -80,7 +80,7 @@ export default async function Home() {
             {snapshot.review.highlights.map((highlight) => (
               <div
                 key={highlight}
-                className="rounded-[1.25rem] border border-border bg-surface-strong px-4 py-3 text-sm"
+                className="rounded-[1.25rem] border border-border bg-[rgba(255,251,245,0.88)] px-4 py-3 text-sm"
               >
                 {highlight}
               </div>
@@ -95,7 +95,7 @@ export default async function Home() {
       </section>
 
       <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="panel rounded-[2rem] p-6 sm:p-8">
+        <div className="panel-raised rounded-[2rem] p-6 sm:p-8">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm uppercase tracking-[0.2em] text-ink-soft">Daily focus</p>
@@ -115,7 +115,7 @@ export default async function Home() {
             {snapshot.dailyFocus.topTasks.map((task, index) => (
               <div
                 key={task.id}
-                className="rounded-[1.5rem] border border-border bg-surface-strong p-5"
+                className="rounded-[1.5rem] border border-border bg-[rgba(255,251,245,0.88)] p-5"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
@@ -141,7 +141,7 @@ export default async function Home() {
         </div>
 
         <div className="grid gap-6">
-          <div className="panel rounded-[2rem] p-6">
+          <div className="panel-raised rounded-[2rem] p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm uppercase tracking-[0.2em] text-ink-soft">Habit logger</p>
@@ -152,7 +152,7 @@ export default async function Home() {
             <Heatmap entries={snapshot.habits.heatmap} />
           </div>
 
-          <div className="panel rounded-[2rem] p-6">
+          <div className="panel-raised rounded-[2rem] p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm uppercase tracking-[0.2em] text-ink-soft">Quick capture</p>
