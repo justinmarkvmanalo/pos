@@ -1,24 +1,18 @@
 "use client";
 
 import { deleteMilestoneAction } from "@/app/actions/data";
-import { SubmitButton } from "@/components/submit-button";
+import { ConfirmActionForm } from "@/components/confirm-action-form";
 
 export function MilestoneDeleteForm({ milestoneId }: { milestoneId: string }) {
   return (
-    <form
+    <ConfirmActionForm
       action={deleteMilestoneAction}
-      onSubmit={(event) => {
-        if (!window.confirm("Delete this milestone? This cannot be undone.")) {
-          event.preventDefault();
-        }
-      }}
-    >
-      <input type="hidden" name="milestone_id" value={milestoneId} />
-      <SubmitButton
-        idleLabel="Delete"
+      hiddenFields={[{ name: "milestone_id", value: milestoneId }]}
+      triggerLabel="Delete"
         pendingLabel="Deleting..."
-        className="inline-flex w-fit rounded-full border border-[#b84c2f] px-3 py-1.5 text-xs font-semibold text-[#b84c2f] transition hover:bg-[#b84c2f] hover:text-[#fff7ef] disabled:opacity-60"
-      />
-    </form>
+      confirmTitle="Delete this milestone?"
+      confirmMessage="This milestone will be removed from the goal plan and the remaining milestone order will be updated."
+      triggerClassName="inline-flex w-fit rounded-full border border-[#b84c2f] px-3 py-1.5 text-xs font-semibold text-[#b84c2f] transition hover:bg-[#b84c2f] hover:text-[#fff7ef] disabled:opacity-60"
+    />
   );
 }
