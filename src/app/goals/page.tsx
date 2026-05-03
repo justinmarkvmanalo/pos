@@ -9,6 +9,7 @@ import { MilestoneDeleteForm } from "@/components/milestone-delete-form";
 import { MilestoneForm } from "@/components/milestone-form";
 import { MilestoneSuggestionForm } from "@/components/milestone-suggestion-form";
 import { MilestoneStatusForm } from "@/components/milestone-status-form";
+import { TrophyCard } from "@/components/trophy-card";
 import { getDashboardSnapshot } from "@/lib/data";
 import { groupGoalExamples } from "@/lib/goal-examples";
 
@@ -173,23 +174,7 @@ export default async function GoalsPage() {
               </div>
             ) : null}
             {goalTrophies.map((trophy) => (
-              <div
-                key={trophy.goalId}
-                className="rounded-[1.5rem] border border-[#e6d39a] bg-[linear-gradient(145deg,#fff7dc_0%,#f6e6a8_100%)] px-4 py-4 shadow-[0_16px_30px_rgba(145,112,23,0.12)]"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#c9961d] text-sm font-bold text-[#fff8e8]">
-                    TOP
-                  </div>
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.18em] text-[#8b6414]">
-                      Awarded {trophy.awardedLabel}
-                    </p>
-                    <p className="mt-1 text-sm font-semibold text-[#4f3610]">{trophy.title}</p>
-                    <p className="mt-2 text-sm leading-6 text-[#6d5321]">{trophy.summary}</p>
-                  </div>
-                </div>
-              </div>
+              <TrophyCard key={trophy.goalId} trophy={trophy} />
             ))}
           </div>
         </aside>
