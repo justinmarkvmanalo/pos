@@ -1,17 +1,27 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { useActionState } from "react";
 import { createGoalAction } from "@/app/actions/data";
+import { ActionToast } from "@/components/action-toast";
 import { RevealForm } from "@/components/reveal-form";
 import { SubmitButton } from "@/components/submit-button";
 import { emptyActionState } from "@/lib/form-state";
 
 export function GoalForm() {
   const [state, formAction] = useActionState(createGoalAction, emptyActionState);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (state.status === "success") {
+      formRef.current?.reset();
+    }
+  }, [state]);
 
   return (
     <RevealForm buttonLabel="Add goal" title="New goal">
-      <form action={formAction} className="space-y-3">
+      <ActionToast state={state} />
+      <form ref={formRef} action={formAction} className="space-y-3">
         <input
           name="title"
           placeholder="Ship the first paying version"
@@ -34,7 +44,9 @@ export function GoalForm() {
             Progress is automatic from milestone completion.
           </div>
         </div>
-        <p className="min-h-5 text-sm text-[#8f2f23]">{state.message}</p>
+        <p className={`min-h-5 text-sm ${state.status === "error" ? "text-[#8f2f23]" : "text-ink-soft"}`}>
+          {state.status === "error" ? state.message : ""}
+        </p>
         <SubmitButton idleLabel="Save goal" pendingLabel="Saving..." />
       </form>
     </RevealForm>

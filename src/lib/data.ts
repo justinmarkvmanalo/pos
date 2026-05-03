@@ -167,7 +167,8 @@ function buildGoals(goals: GoalRow[], milestones: MilestoneRow[]) {
     return {
       id: goal.id,
       title: goal.title,
-      deadline: formatDeadline(goal.deadline),
+      deadline: goal.deadline,
+      deadlineLabel: formatDeadline(goal.deadline),
       progress,
       ownerNote: goal.owner_note,
       completedMilestones,

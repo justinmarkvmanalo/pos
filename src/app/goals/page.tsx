@@ -1,5 +1,6 @@
 import { connection } from "next/server";
 import { AppShell } from "@/components/app-shell";
+import { GoalDeadlineForm } from "@/components/goal-deadline-form";
 import { GoalExampleForm } from "@/components/goal-example-form";
 import { GoalForm } from "@/components/goal-form";
 import { GoalDeleteForm } from "@/components/goal-delete-form";
@@ -41,6 +42,7 @@ export default async function GoalsPage() {
                       key={example.title}
                       title={example.title}
                       ownerNote={example.ownerNote}
+                      starterMilestones={example.starterMilestones}
                     />
                   ))}
                 </div>
@@ -61,7 +63,7 @@ export default async function GoalsPage() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-sm uppercase tracking-[0.16em] text-ink-soft">
-                  {goal.deadline ? `Due ${goal.deadline}` : "No deadline set"}
+                  {goal.deadlineLabel ? `Due ${goal.deadlineLabel}` : "No deadline set"}
                 </p>
                 <h2 className="mt-2 text-2xl font-semibold">{goal.title}</h2>
                 <p className="mt-2 text-sm text-ink-soft">
@@ -86,6 +88,7 @@ export default async function GoalsPage() {
               />
             </div>
             <p className="mt-4 text-sm leading-6 text-ink-soft">{goal.ownerNote}</p>
+            <GoalDeadlineForm goalId={goal.id} deadline={goal.deadline} />
             <div className="mt-6 space-y-3">
               {goal.milestones.length === 0 ? (
                 <div className="rounded-[1.25rem] border border-dashed border-border bg-surface-strong px-4 py-3 text-sm text-ink-soft">

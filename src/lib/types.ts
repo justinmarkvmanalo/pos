@@ -16,6 +16,7 @@ export type Goal = {
   id: string;
   title: string;
   deadline: string | null;
+  deadlineLabel: string | null;
   progress: number;
   ownerNote: string;
   completedMilestones: number;

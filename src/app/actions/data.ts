@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireAuthContext } from "@/lib/auth";
 import { getCurrentWeekIso } from "@/lib/data";
-import type { ActionState } from "@/lib/form-state";
+import { errorActionState, successActionState, type ActionState } from "@/lib/form-state";
 import { buildWeeklyReviewText } from "@/lib/review";
 import { getSupabaseUserServerClient } from "@/lib/supabase";
 
@@ -121,6 +121,58 @@ function revalidateApp() {
   revalidatePath("/review");
 }
 
+async function createGoalRecord(
+  supabase: Awaited<ReturnType<typeof getSupabaseOrThrow>>["supabase"],
+  userId: string,
+  {
+    title,
+    ownerNote,
+    deadline,
+    starterMilestones,
+  }: {
+    title: string;
+    ownerNote: string;
+    deadline: string | null;
+    starterMilestones: string[];
+  },
+) {
+  const { data: goal, error } = await supabase
+    .from("goals")
+    .insert({
+      owner_id: userId,
+      title,
+      owner_note: ownerNote,
+      deadline,
+      progress: 0,
+    })
+    .select("id")
+    .single();
+
+  if (error || !goal) {
+    return errorActionState(error?.message ?? "Could not create the goal.");
+  }
+
+  if (starterMilestones.length > 0) {
+    const { error: milestoneError } = await supabase.from("milestones").insert(
+      starterMilestones.map((milestone, index) => ({
+        owner_id: userId,
+        goal_id: goal.id,
+        name: milestone,
+        status: index === 0 ? "active" : "up-next",
+        sort_order: index + 1,
+      })),
+    );
+
+    if (milestoneError) {
+      return errorActionState(milestoneError.message);
+    }
+  }
+
+  await syncGoalProgress(supabase, goal.id);
+  revalidateApp();
+  return successActionState("Goal added.");
+}
+
 export async function createTaskAction(
   _: ActionState,
   formData: FormData,
@@ -134,7 +186,7 @@ export async function createTaskAction(
   const taskDate = getTrimmedField(formData, "task_date") || new Date().toISOString().slice(0, 10);
 
   if (!title) {
-    return { message: "Task title is required." };
+    return errorActionState("Task title is required.");
   }
 
   const { error } = await supabase.from("tasks").insert({
@@ -147,11 +199,11 @@ export async function createTaskAction(
   });
 
   if (error) {
-    return { message: error.message };
+    return errorActionState(error.message);
   }
 
   revalidateApp();
-  return { message: "Task added." };
+  return successActionState("Task added.");
 }
 
 export async function createGoalAction(
@@ -163,29 +215,54 @@ export async function createGoalAction(
   const title = getTrimmedField(formData, "title");
   const ownerNote = getTrimmedField(formData, "owner_note");
   const deadline = getTrimmedField(formData, "deadline") || null;
+  const starterMilestones = formData
+    .getAll("starter_milestones")
+    .map((value) => String(value).trim())
+    .filter(Boolean);
 
   if (!title) {
-    return { message: "Goal title is required." };
+    return errorActionState("Goal title is required.");
   }
 
-  const { error } = await supabase.from("goals").insert({
-    owner_id: userId,
+  return createGoalRecord(supabase, userId, {
     title,
-    owner_note: ownerNote,
+    ownerNote,
     deadline,
-    progress: 0,
+    starterMilestones,
   });
-
-  if (error) {
-    return { message: error.message };
-  }
-
-  revalidateApp();
-  return { message: "Goal added." };
 }
 
 export async function createSuggestedGoalAction(formData: FormData) {
-  await createGoalAction({ message: "" }, formData);
+  await createGoalAction(successActionState(""), formData);
+}
+
+export async function updateGoalDeadlineAction(formData: FormData) {
+  const { supabase } = await getSupabaseOrThrow();
+
+  const goalId = getTrimmedField(formData, "goal_id");
+  const deadline = getTrimmedField(formData, "deadline") || null;
+
+  if (!goalId) {
+    return;
+  }
+
+  const { data: goal, error: goalError } = await supabase
+    .from("goals")
+    .select("id")
+    .eq("id", goalId)
+    .maybeSingle();
+
+  if (goalError || !goal) {
+    return;
+  }
+
+  const { error } = await supabase.from("goals").update({ deadline }).eq("id", goalId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidateApp();
 }
 
 export async function createMilestoneAction(
@@ -198,7 +275,7 @@ export async function createMilestoneAction(
   const name = getTrimmedField(formData, "name");
 
   if (!goalId || !name) {
-    return { message: "Goal and milestone name are required." };
+    return errorActionState("Goal and milestone name are required.");
   }
 
   const { data: goal, error: goalError } = await supabase
@@ -208,7 +285,7 @@ export async function createMilestoneAction(
     .maybeSingle();
 
   if (goalError || !goal) {
-    return { message: "Goal not found." };
+    return errorActionState("Goal not found.");
   }
 
   const { data: existingMilestones, error: milestonesError } = await supabase
@@ -218,7 +295,7 @@ export async function createMilestoneAction(
     .order("sort_order", { ascending: true });
 
   if (milestonesError) {
-    return { message: milestonesError.message };
+    return errorActionState(milestonesError.message);
   }
 
   const milestoneCount = existingMilestones?.length ?? 0;
@@ -234,17 +311,17 @@ export async function createMilestoneAction(
   });
 
   if (error) {
-    return { message: error.message };
+    return errorActionState(error.message);
   }
 
   await syncGoalProgress(supabase, goalId);
 
   revalidateApp();
-  return { message: "Milestone added." };
+  return successActionState("Milestone added.");
 }
 
 export async function createSuggestedMilestoneAction(formData: FormData) {
-  await createMilestoneAction({ message: "" }, formData);
+  await createMilestoneAction(successActionState(""), formData);
 }
 
 export async function deleteGoalAction(formData: FormData) {
@@ -394,7 +471,7 @@ export async function createHabitAction(
     : 7;
 
   if (!name) {
-    return { message: "Habit name is required." };
+    return errorActionState("Habit name is required.");
   }
 
   const { data: existingHabit, error: existingHabitError } = await supabase
@@ -404,11 +481,11 @@ export async function createHabitAction(
     .maybeSingle();
 
   if (existingHabitError) {
-    return { message: existingHabitError.message };
+    return errorActionState(existingHabitError.message);
   }
 
   if (existingHabit) {
-    return { message: "Habit already exists." };
+    return errorActionState("Habit already exists.");
   }
 
   const { error } = await supabase.from("habits").insert({
@@ -418,15 +495,15 @@ export async function createHabitAction(
   });
 
   if (error) {
-    return { message: error.message };
+    return errorActionState(error.message);
   }
 
   revalidateApp();
-  return { message: "Habit added." };
+  return successActionState("Habit added.");
 }
 
 export async function createSuggestedHabitAction(formData: FormData) {
-  await createHabitAction({ message: "" }, formData);
+  await createHabitAction(successActionState(""), formData);
 }
 
 export async function logHabitAction(formData: FormData) {
@@ -469,7 +546,7 @@ export async function createCaptureAction(
   const body = getTrimmedField(formData, "body");
 
   if (!body) {
-    return { message: "Capture text is required." };
+    return errorActionState("Capture text is required.");
   }
 
   const { error } = await supabase.from("captures").insert({
@@ -480,11 +557,11 @@ export async function createCaptureAction(
   });
 
   if (error) {
-    return { message: error.message };
+    return errorActionState(error.message);
   }
 
   revalidateApp();
-  return { message: "Capture added." };
+  return successActionState("Capture added.");
 }
 
 export async function generateReviewAction() {

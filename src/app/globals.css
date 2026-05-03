@@ -113,6 +113,10 @@ a {
   animation: shimmer-slide 1.5s ease-in-out infinite;
 }
 
+.success-toast {
+  animation: success-toast-pop 2.6s ease forwards;
+}
+
 @keyframes fade-up {
   from {
     opacity: 0;
@@ -130,5 +134,21 @@ a {
   }
   to {
     transform: translateX(100%);
+  }
+}
+
+@keyframes success-toast-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.96);
+  }
+  12%,
+  78% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
   }
 }

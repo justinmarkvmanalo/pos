@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { clearAuthSession, getOptionalUser, setAuthSession } from "@/lib/auth";
-import type { ActionState } from "@/lib/form-state";
+import { errorActionState, successActionState, type ActionState } from "@/lib/form-state";
 import { getSupabaseAuthClient } from "@/lib/supabase";
 
 function getTrimmedField(formData: FormData, key: string) {
@@ -14,12 +14,12 @@ export async function loginAction(_: ActionState, formData: FormData): Promise<A
   const password = getTrimmedField(formData, "password");
 
   if (!email || !password) {
-    return { message: "Email and password are required." };
+    return errorActionState("Email and password are required.");
   }
 
   const supabase = getSupabaseAuthClient();
   if (!supabase) {
-    return { message: "Supabase auth is not configured." };
+    return errorActionState("Supabase auth is not configured.");
   }
 
   const { data, error } = await supabase.auth.signInWithPassword({
@@ -28,7 +28,7 @@ export async function loginAction(_: ActionState, formData: FormData): Promise<A
   });
 
   if (error || !data.session) {
-    return { message: error?.message ?? "Login failed." };
+    return errorActionState(error?.message ?? "Login failed.");
   }
 
   await setAuthSession(data.session);
@@ -41,16 +41,16 @@ export async function signupAction(_: ActionState, formData: FormData): Promise<
   const password = getTrimmedField(formData, "password");
 
   if (!name || !email || !password) {
-    return { message: "Name, email, and password are required." };
+    return errorActionState("Name, email, and password are required.");
   }
 
   if (password.length < 8) {
-    return { message: "Password must be at least 8 characters." };
+    return errorActionState("Password must be at least 8 characters.");
   }
 
   const supabase = getSupabaseAuthClient();
   if (!supabase) {
-    return { message: "Supabase auth is not configured." };
+    return errorActionState("Supabase auth is not configured.");
   }
 
   const { data, error } = await supabase.auth.signUp({
@@ -64,7 +64,7 @@ export async function signupAction(_: ActionState, formData: FormData): Promise<
   });
 
   if (error) {
-    return { message: error.message };
+    return errorActionState(error.message);
   }
 
   if (data.session) {
@@ -72,9 +72,9 @@ export async function signupAction(_: ActionState, formData: FormData): Promise<
     redirect("/");
   }
 
-  return {
-    message: "Account created. If email confirmation is enabled, verify your email before logging in.",
-  };
+  return successActionState(
+    "Account created. If email confirmation is enabled, verify your email before logging in.",
+  );
 }
 
 export async function logoutAction() {

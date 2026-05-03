@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { useActionState } from "react";
 import { createHabitAction } from "@/app/actions/data";
+import { ActionToast } from "@/components/action-toast";
 import { RevealForm } from "@/components/reveal-form";
 import { SubmitButton } from "@/components/submit-button";
 import { emptyActionState } from "@/lib/form-state";
@@ -9,10 +11,18 @@ import { habitFrequencyOptions } from "@/lib/habits";
 
 export function HabitForm() {
   const [state, formAction] = useActionState(createHabitAction, emptyActionState);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (state.status === "success") {
+      formRef.current?.reset();
+    }
+  }, [state]);
 
   return (
     <RevealForm buttonLabel="Add habit" title="New habit">
-      <form action={formAction} className="space-y-3">
+      <ActionToast state={state} />
+      <form ref={formRef} action={formAction} className="space-y-3">
         <input
           name="name"
           placeholder="Exercise"
@@ -37,7 +47,9 @@ export function HabitForm() {
           This sets your weekly target. Example: choose <strong>3 times a week</strong> if the
           habit does not need to happen every day.
         </p>
-        <p className="min-h-5 text-sm text-[#8f2f23]">{state.message}</p>
+        <p className={`min-h-5 text-sm ${state.status === "error" ? "text-[#8f2f23]" : "text-ink-soft"}`}>
+          {state.status === "error" ? state.message : ""}
+        </p>
         <SubmitButton idleLabel="Save habit" pendingLabel="Saving..." />
       </form>
     </RevealForm>
