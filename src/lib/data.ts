@@ -8,6 +8,7 @@ import type {
   FocusTask,
   Goal,
   GoalMilestone,
+  GoalTrophy,
   HabitSummary,
   HeatmapEntry,
 } from "@/lib/types";
@@ -27,6 +28,7 @@ type GoalRow = {
   owner_note: string;
   deadline: string | null;
   progress: number;
+  updated_at: string;
 };
 
 type MilestoneRow = {
@@ -81,6 +83,19 @@ function formatDeadline(value: string | null) {
   const date = new Date(`${value}T00:00:00`);
   if (Number.isNaN(date.getTime())) {
     return value;
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(date);
+}
+
+function formatAwardedDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "Recently";
   }
 
   return new Intl.DateTimeFormat("en-US", {
@@ -169,6 +184,7 @@ function buildGoals(goals: GoalRow[], milestones: MilestoneRow[]) {
       title: goal.title,
       deadline: goal.deadline,
       deadlineLabel: formatDeadline(goal.deadline),
+      updatedAt: goal.updated_at,
       progress,
       ownerNote: goal.owner_note,
       completedMilestones,
@@ -182,6 +198,19 @@ function buildGoals(goals: GoalRow[], milestones: MilestoneRow[]) {
       ),
     };
   }) satisfies Goal[];
+}
+
+function buildGoalTrophies(goals: Goal[]) {
+  return goals
+    .filter((goal) => goal.progress === 100 && goal.totalMilestones > 0)
+    .map((goal) => ({
+      goalId: goal.id,
+      title: goal.title,
+      awardedLabel: formatAwardedDate(goal.updatedAt),
+      summary: goal.deadlineLabel
+        ? `Finished all milestones. Target date was ${goal.deadlineLabel}.`
+        : "Finished all milestones for this goal.",
+    })) satisfies GoalTrophy[];
 }
 
 function buildHabitSummaries(habits: HabitRow[], logs: HabitLogRow[]) {
@@ -236,6 +265,7 @@ const emptySnapshot: DashboardSnapshot = {
     topTasks: [],
   },
   goals: [],
+  goalTrophies: [],
   habits: {
     completionRate: 0,
     summaries: [],
@@ -282,7 +312,7 @@ export const getDashboardSnapshot = cache(async (): Promise<DashboardSnapshot> =
       .eq("task_date", todayIso)
       .order("focus_order", { ascending: true })
       .limit(3),
-    supabase.from("goals").select("id,title,owner_note,deadline,progress").order("created_at", {
+    supabase.from("goals").select("id,title,owner_note,deadline,progress,updated_at").order("created_at", {
       ascending: true,
     }),
     supabase.from("milestones").select("id,goal_id,name,status,sort_order").order("sort_order", {
@@ -312,6 +342,7 @@ export const getDashboardSnapshot = cache(async (): Promise<DashboardSnapshot> =
 
   const tasks = (tasksResult.data ?? []) as TaskRow[];
   const goals = buildGoals((goalsResult.data ?? []) as GoalRow[], (milestonesResult.data ?? []) as MilestoneRow[]);
+  const goalTrophies = buildGoalTrophies(goals);
   const habits = buildHabitSummaries(
     (habitsResult.data ?? []) as HabitRow[],
     (habitLogsResult.data ?? []) as HabitLogRow[],
@@ -354,6 +385,7 @@ export const getDashboardSnapshot = cache(async (): Promise<DashboardSnapshot> =
       topTasks: focusTasks,
     },
     goals,
+    goalTrophies,
     habits: {
       completionRate,
       summaries: habits,

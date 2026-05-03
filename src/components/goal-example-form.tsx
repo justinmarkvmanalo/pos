@@ -1,6 +1,9 @@
 "use client";
 
+import { useActionState } from "react";
 import { createSuggestedGoalAction } from "@/app/actions/data";
+import { ActionToast } from "@/components/action-toast";
+import { emptyActionState } from "@/lib/form-state";
 
 export function GoalExampleForm({
   title,
@@ -11,8 +14,11 @@ export function GoalExampleForm({
   ownerNote: string;
   starterMilestones: string[];
 }) {
+  const [state, formAction] = useActionState(createSuggestedGoalAction, emptyActionState);
+
   return (
-    <form action={createSuggestedGoalAction}>
+    <form action={formAction}>
+      <ActionToast state={state} />
       <input type="hidden" name="title" value={title} />
       <input type="hidden" name="owner_note" value={ownerNote} />
       <input type="hidden" name="deadline" value="" />
@@ -29,6 +35,9 @@ export function GoalExampleForm({
           Includes starter milestones
         </span>
       </button>
+      {state.status === "error" ? (
+        <p className="mt-2 text-xs text-[#8f2f23]">{state.message}</p>
+      ) : null}
     </form>
   );
 }

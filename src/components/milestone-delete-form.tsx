@@ -5,7 +5,14 @@ import { SubmitButton } from "@/components/submit-button";
 
 export function MilestoneDeleteForm({ milestoneId }: { milestoneId: string }) {
   return (
-    <form action={deleteMilestoneAction}>
+    <form
+      action={deleteMilestoneAction}
+      onSubmit={(event) => {
+        if (!window.confirm("Delete this milestone? This cannot be undone.")) {
+          event.preventDefault();
+        }
+      }}
+    >
       <input type="hidden" name="milestone_id" value={milestoneId} />
       <SubmitButton
         idleLabel="Delete"

@@ -5,7 +5,14 @@ import { SubmitButton } from "@/components/submit-button";
 
 export function GoalDeleteForm({ goalId }: { goalId: string }) {
   return (
-    <form action={deleteGoalAction}>
+    <form
+      action={deleteGoalAction}
+      onSubmit={(event) => {
+        if (!window.confirm("Delete this goal and all of its milestones? This cannot be undone.")) {
+          event.preventDefault();
+        }
+      }}
+    >
       <input type="hidden" name="goal_id" value={goalId} />
       <SubmitButton
         idleLabel="Delete goal"

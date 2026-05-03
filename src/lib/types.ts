@@ -17,6 +17,7 @@ export type Goal = {
   title: string;
   deadline: string | null;
   deadlineLabel: string | null;
+  updatedAt: string;
   progress: number;
   ownerNote: string;
   completedMilestones: number;
@@ -24,6 +25,13 @@ export type Goal = {
   currentMilestone: string | null;
   milestones: GoalMilestone[];
   suggestions: string[];
+};
+
+export type GoalTrophy = {
+  goalId: string;
+  title: string;
+  awardedLabel: string;
+  summary: string;
 };
 
 export type HabitSummary = {
@@ -64,6 +72,7 @@ export type DashboardSnapshot = {
     topTasks: FocusTask[];
   };
   goals: Goal[];
+  goalTrophies: GoalTrophy[];
   habits: {
     completionRate: number;
     summaries: HabitSummary[];

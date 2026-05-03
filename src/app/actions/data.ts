@@ -232,8 +232,11 @@ export async function createGoalAction(
   });
 }
 
-export async function createSuggestedGoalAction(formData: FormData) {
-  await createGoalAction(successActionState(""), formData);
+export async function createSuggestedGoalAction(
+  _: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  return createGoalAction(successActionState(""), formData);
 }
 
 export async function updateGoalDeadlineAction(formData: FormData) {
@@ -502,8 +505,11 @@ export async function createHabitAction(
   return successActionState("Habit added.");
 }
 
-export async function createSuggestedHabitAction(formData: FormData) {
-  await createHabitAction(successActionState(""), formData);
+export async function createSuggestedHabitAction(
+  _: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  return createHabitAction(successActionState(""), formData);
 }
 
 export async function logHabitAction(formData: FormData) {

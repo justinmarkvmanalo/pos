@@ -14,8 +14,9 @@ import { groupGoalExamples } from "@/lib/goal-examples";
 
 export default async function GoalsPage() {
   await connection();
-  const { goals } = await getDashboardSnapshot();
+  const { goals, goalTrophies } = await getDashboardSnapshot();
   const goalExampleGroups = groupGoalExamples();
+  const todayIso = new Date().toISOString().slice(0, 10);
 
   return (
     <AppShell>
@@ -52,14 +53,20 @@ export default async function GoalsPage() {
         </CollapsiblePanel>
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-3">
+      <section className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="grid gap-6 xl:grid-cols-2">
         {goals.length === 0 ? (
-          <article className="panel rounded-[2rem] p-6 text-sm text-ink-soft xl:col-span-3">
+          <article className="panel rounded-[2rem] p-6 text-sm text-ink-soft xl:col-span-2">
             No goals yet. Add your first goal above, then break it into milestones here.
           </article>
         ) : null}
         {goals.map((goal) => (
           <article key={goal.id} className="panel rounded-[2rem] p-6">
+            {(() => {
+              const isFailed = Boolean(goal.deadline && goal.progress < 100 && goal.deadline < todayIso);
+
+              return (
+                <>
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-sm uppercase tracking-[0.16em] text-ink-soft">
@@ -74,9 +81,16 @@ export default async function GoalsPage() {
                       }`}
                 </p>
               </div>
-              <span className="rounded-full bg-accent-soft px-3 py-1 text-sm font-semibold text-accent-strong">
-                {goal.progress}%
-              </span>
+              <div className="flex flex-col items-end gap-2">
+                <span className="rounded-full bg-accent-soft px-3 py-1 text-sm font-semibold text-accent-strong">
+                  {goal.progress}%
+                </span>
+                {isFailed ? (
+                  <span className="rounded-full bg-[#f4d3cc] px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[#a33a22]">
+                    Failed
+                  </span>
+                ) : null}
+              </div>
             </div>
             <div className="mt-4">
               <GoalDeleteForm goalId={goal.id} />
@@ -140,8 +154,45 @@ export default async function GoalsPage() {
               ) : null}
               <MilestoneForm goalId={goal.id} />
             </CollapsiblePanel>
+                </>
+              );
+            })()}
           </article>
         ))}
+        </div>
+        <aside className="panel self-start rounded-[2rem] p-6">
+          <p className="text-sm uppercase tracking-[0.2em] text-ink-soft">Trophy case</p>
+          <h2 className="mt-2 text-2xl font-semibold">Finished goals</h2>
+          <p className="mt-3 text-sm leading-6 text-ink-soft">
+            Every goal that reaches full completion earns a trophy here.
+          </p>
+          <div className="mt-5 space-y-3">
+            {goalTrophies.length === 0 ? (
+              <div className="rounded-[1.5rem] border border-dashed border-border bg-surface-strong px-4 py-4 text-sm text-ink-soft">
+                No trophies yet. Finish a goal to unlock your first one.
+              </div>
+            ) : null}
+            {goalTrophies.map((trophy) => (
+              <div
+                key={trophy.goalId}
+                className="rounded-[1.5rem] border border-[#e6d39a] bg-[linear-gradient(145deg,#fff7dc_0%,#f6e6a8_100%)] px-4 py-4 shadow-[0_16px_30px_rgba(145,112,23,0.12)]"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#c9961d] text-sm font-bold text-[#fff8e8]">
+                    TOP
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.18em] text-[#8b6414]">
+                      Awarded {trophy.awardedLabel}
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-[#4f3610]">{trophy.title}</p>
+                    <p className="mt-2 text-sm leading-6 text-[#6d5321]">{trophy.summary}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </aside>
       </section>
     </AppShell>
   );

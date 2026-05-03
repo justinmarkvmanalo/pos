@@ -1,9 +1,10 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { clearAuthSession, getOptionalUser, setAuthSession } from "@/lib/auth";
+import { clearAuthSession, getOptionalUser, requireAuthContext, setAuthSession } from "@/lib/auth";
 import { errorActionState, successActionState, type ActionState } from "@/lib/form-state";
-import { getSupabaseAuthClient } from "@/lib/supabase";
+import { getSupabaseAuthClient, getSupabaseUserServerClient } from "@/lib/supabase";
 
 function getTrimmedField(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
@@ -80,6 +81,38 @@ export async function signupAction(_: ActionState, formData: FormData): Promise<
 export async function logoutAction() {
   await clearAuthSession();
   redirect("/login");
+}
+
+export async function updateProfileAction(_: ActionState, formData: FormData): Promise<ActionState> {
+  const auth = await requireAuthContext();
+  const supabase = getSupabaseUserServerClient(auth.accessToken);
+
+  if (!supabase) {
+    return errorActionState("Supabase auth is not configured.");
+  }
+
+  const name = getTrimmedField(formData, "name");
+  const email = getTrimmedField(formData, "email");
+
+  if (!name || !email) {
+    return errorActionState("Name and email are required.");
+  }
+
+  const { error } = await supabase.auth.updateUser({
+    email,
+    data: {
+      name,
+    },
+  });
+
+  if (error) {
+    return errorActionState(error.message);
+  }
+
+  revalidatePath("/");
+  revalidatePath("/profile");
+
+  return successActionState("Profile updated.");
 }
 
 export async function redirectIfLoggedIn() {
