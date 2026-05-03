@@ -1,5 +1,6 @@
 import { connection } from "next/server";
 import { AppShell } from "@/components/app-shell";
+import { CollapsiblePanel } from "@/components/collapsible-panel";
 import { GoalDeadlineForm } from "@/components/goal-deadline-form";
 import { GoalExampleForm } from "@/components/goal-example-form";
 import { GoalForm } from "@/components/goal-form";
@@ -26,12 +27,11 @@ export default async function GoalsPage() {
           app calculate progress from what is actually finished.
         </p>
         <GoalForm />
-        <div className="mt-6 rounded-[1.5rem] border border-dashed border-border bg-surface-strong p-4">
-          <p className="text-sm font-semibold">Goal idea library</p>
-          <p className="mt-2 text-sm leading-6 text-ink-soft">
-            This keeps manual goal creation, but also gives you many example goals you can add with
-            one click and customize later with milestones and notes.
-          </p>
+        <CollapsiblePanel
+          buttonLabel="Goal idea library"
+          title="Goal idea library"
+          description="This keeps manual goal creation, but also gives you many example goals you can add with one click and customize later with milestones and notes."
+        >
           <div className="mt-4 grid gap-4">
             {goalExampleGroups.map((group) => (
               <div key={group.category}>
@@ -49,7 +49,7 @@ export default async function GoalsPage() {
               </div>
             ))}
           </div>
-        </div>
+        </CollapsiblePanel>
       </section>
 
       <section className="grid gap-6 xl:grid-cols-3">
@@ -89,51 +89,57 @@ export default async function GoalsPage() {
             </div>
             <p className="mt-4 text-sm leading-6 text-ink-soft">{goal.ownerNote}</p>
             <GoalDeadlineForm goalId={goal.id} deadline={goal.deadline} />
-            <div className="mt-6 space-y-3">
-              {goal.milestones.length === 0 ? (
-                <div className="rounded-[1.25rem] border border-dashed border-border bg-surface-strong px-4 py-3 text-sm text-ink-soft">
-                  No milestones yet.
+            <CollapsiblePanel
+              buttonLabel="Milestones"
+              title="Milestones"
+              description="Open this section to review milestone progress, add suggested steps, or create your own next action for this goal."
+            >
+              <div className="space-y-3">
+                {goal.milestones.length === 0 ? (
+                  <div className="rounded-[1.25rem] border border-dashed border-border bg-surface-strong px-4 py-3 text-sm text-ink-soft">
+                    No milestones yet.
+                  </div>
+                ) : null}
+                {goal.milestones.map((milestone) => (
+                  <div
+                    key={milestone.id}
+                    className="rounded-[1.25rem] border border-border bg-white/70 px-4 py-3"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="text-xs uppercase tracking-[0.18em] text-ink-soft">
+                        {milestone.status}
+                      </p>
+                      <MilestoneDeleteForm milestoneId={milestone.id} />
+                    </div>
+                    <p className="mt-1 text-sm font-medium">{milestone.name}</p>
+                    <MilestoneStatusForm
+                      milestoneId={milestone.id}
+                      currentStatus={milestone.status}
+                    />
+                  </div>
+                ))}
+              </div>
+              {goal.suggestions.length > 0 ? (
+                <div className="mt-6 rounded-[1.5rem] border border-dashed border-border bg-white/70 p-4">
+                  <p className="text-xs uppercase tracking-[0.18em] text-ink-soft">
+                    Need ideas? Start here
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-ink-soft">
+                    Tap a suggestion to turn it into a milestone for this goal.
+                  </p>
+                  <div className="mt-4 grid gap-2">
+                    {goal.suggestions.map((suggestion) => (
+                      <MilestoneSuggestionForm
+                        key={`${goal.id}-${suggestion}`}
+                        goalId={goal.id}
+                        suggestion={suggestion}
+                      />
+                    ))}
+                  </div>
                 </div>
               ) : null}
-              {goal.milestones.map((milestone) => (
-                <div
-                  key={milestone.id}
-                  className="rounded-[1.25rem] border border-border bg-surface-strong px-4 py-3"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <p className="text-xs uppercase tracking-[0.18em] text-ink-soft">
-                      {milestone.status}
-                    </p>
-                    <MilestoneDeleteForm milestoneId={milestone.id} />
-                  </div>
-                  <p className="mt-1 text-sm font-medium">{milestone.name}</p>
-                  <MilestoneStatusForm
-                    milestoneId={milestone.id}
-                    currentStatus={milestone.status}
-                  />
-                </div>
-              ))}
-            </div>
-            {goal.suggestions.length > 0 ? (
-              <div className="mt-6 rounded-[1.5rem] border border-dashed border-border bg-surface-strong p-4">
-                <p className="text-xs uppercase tracking-[0.18em] text-ink-soft">
-                  Need ideas? Start here
-                </p>
-                <p className="mt-2 text-sm leading-6 text-ink-soft">
-                  Tap a suggestion to turn it into a milestone for this goal.
-                </p>
-                <div className="mt-4 grid gap-2">
-                  {goal.suggestions.map((suggestion) => (
-                    <MilestoneSuggestionForm
-                      key={`${goal.id}-${suggestion}`}
-                      goalId={goal.id}
-                      suggestion={suggestion}
-                    />
-                  ))}
-                </div>
-              </div>
-            ) : null}
-            <MilestoneForm goalId={goal.id} />
+              <MilestoneForm goalId={goal.id} />
+            </CollapsiblePanel>
           </article>
         ))}
       </section>
