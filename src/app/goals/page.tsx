@@ -1,14 +1,19 @@
 import { connection } from "next/server";
 import { AppShell } from "@/components/app-shell";
+import { GoalExampleForm } from "@/components/goal-example-form";
 import { GoalForm } from "@/components/goal-form";
+import { GoalDeleteForm } from "@/components/goal-delete-form";
+import { MilestoneDeleteForm } from "@/components/milestone-delete-form";
 import { MilestoneForm } from "@/components/milestone-form";
 import { MilestoneSuggestionForm } from "@/components/milestone-suggestion-form";
 import { MilestoneStatusForm } from "@/components/milestone-status-form";
 import { getDashboardSnapshot } from "@/lib/data";
+import { groupGoalExamples } from "@/lib/goal-examples";
 
 export default async function GoalsPage() {
   await connection();
   const { goals } = await getDashboardSnapshot();
+  const goalExampleGroups = groupGoalExamples();
 
   return (
     <AppShell>
@@ -20,6 +25,29 @@ export default async function GoalsPage() {
           app calculate progress from what is actually finished.
         </p>
         <GoalForm />
+        <div className="mt-6 rounded-[1.5rem] border border-dashed border-border bg-surface-strong p-4">
+          <p className="text-sm font-semibold">Goal idea library</p>
+          <p className="mt-2 text-sm leading-6 text-ink-soft">
+            This keeps manual goal creation, but also gives you many example goals you can add with
+            one click and customize later with milestones and notes.
+          </p>
+          <div className="mt-4 grid gap-4">
+            {goalExampleGroups.map((group) => (
+              <div key={group.category}>
+                <p className="text-xs uppercase tracking-[0.18em] text-ink-soft">{group.category}</p>
+                <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                  {group.examples.map((example) => (
+                    <GoalExampleForm
+                      key={example.title}
+                      title={example.title}
+                      ownerNote={example.ownerNote}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
 
       <section className="grid gap-6 xl:grid-cols-3">
@@ -48,6 +76,9 @@ export default async function GoalsPage() {
                 {goal.progress}%
               </span>
             </div>
+            <div className="mt-4">
+              <GoalDeleteForm goalId={goal.id} />
+            </div>
             <div className="mt-5 h-3 overflow-hidden rounded-full bg-[#eadbc9]">
               <div
                 className="h-full rounded-full bg-[linear-gradient(90deg,#c85f32_0%,#e09e73_100%)]"
@@ -66,9 +97,12 @@ export default async function GoalsPage() {
                   key={milestone.id}
                   className="rounded-[1.25rem] border border-border bg-surface-strong px-4 py-3"
                 >
-                  <p className="text-xs uppercase tracking-[0.18em] text-ink-soft">
-                    {milestone.status}
-                  </p>
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="text-xs uppercase tracking-[0.18em] text-ink-soft">
+                      {milestone.status}
+                    </p>
+                    <MilestoneDeleteForm milestoneId={milestone.id} />
+                  </div>
                   <p className="mt-1 text-sm font-medium">{milestone.name}</p>
                   <MilestoneStatusForm
                     milestoneId={milestone.id}

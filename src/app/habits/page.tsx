@@ -3,12 +3,15 @@ import { AppShell } from "@/components/app-shell";
 import { HabitForm } from "@/components/habit-form";
 import { Heatmap } from "@/components/heatmap";
 import { HabitLogButton } from "@/components/habit-log-button";
+import { HabitSuggestionForm } from "@/components/habit-suggestion-form";
 import { getDashboardSnapshot } from "@/lib/data";
+import { groupHabitSuggestions } from "@/lib/habit-suggestions";
 import { getHabitFrequencyLabel } from "@/lib/habits";
 
 export default async function HabitsPage() {
   await connection();
   const { habits } = await getDashboardSnapshot();
+  const suggestionGroups = groupHabitSuggestions();
 
   return (
     <AppShell>
@@ -21,6 +24,28 @@ export default async function HabitsPage() {
             log the days you did it, and the page shows whether you are on pace.
           </p>
           <HabitForm />
+          <div className="mt-6 rounded-[1.5rem] border border-dashed border-border bg-surface-strong p-4">
+            <p className="text-sm font-semibold">Habit idea library</p>
+            <p className="mt-2 text-sm leading-6 text-ink-soft">
+              This is a large built-in list of common human habits you can add with one click.
+            </p>
+            <div className="mt-4 grid gap-4">
+              {suggestionGroups.map((group) => (
+                <div key={group.category}>
+                  <p className="text-xs uppercase tracking-[0.18em] text-ink-soft">{group.category}</p>
+                  <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                    {group.suggestions.map((suggestion) => (
+                      <HabitSuggestionForm
+                        key={suggestion.name}
+                        name={suggestion.name}
+                        targetFrequency={suggestion.targetFrequency}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
           <Heatmap entries={habits.heatmap} />
         </div>
 

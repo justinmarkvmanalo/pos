@@ -57,6 +57,35 @@ type MilestoneRecord = {
   sort_order: number;
 };
 
+function enforceMilestoneSequence(milestones: MilestoneRecord[]) {
+  const nextMilestones = milestones
+    .map((milestone, index) => ({
+      ...milestone,
+      sort_order: index + 1,
+    }))
+    .sort((left, right) => left.sort_order - right.sort_order);
+
+  const activeMilestones = nextMilestones.filter((milestone) => milestone.status === "active");
+  if (activeMilestones.length > 1) {
+    const [firstActive, ...rest] = activeMilestones;
+    for (const milestone of rest) {
+      if (milestone.id !== firstActive.id) {
+        milestone.status = "up-next";
+      }
+    }
+  }
+
+  const hasActiveMilestone = nextMilestones.some((milestone) => milestone.status === "active");
+  if (!hasActiveMilestone) {
+    const nextAvailableMilestone = nextMilestones.find((milestone) => milestone.status !== "done");
+    if (nextAvailableMilestone) {
+      nextAvailableMilestone.status = "active";
+    }
+  }
+
+  return nextMilestones;
+}
+
 function normalizeMilestoneStatuses(
   milestones: MilestoneRecord[],
   milestoneId: string,
@@ -81,28 +110,7 @@ function normalizeMilestoneStatuses(
     }
   }
 
-  const activeMilestones = nextMilestones.filter((milestone) => milestone.status === "active");
-  if (activeMilestones.length > 1) {
-    const [firstActive, ...rest] = activeMilestones.sort((left, right) => left.sort_order - right.sort_order);
-    for (const milestone of rest) {
-      if (milestone.id !== firstActive.id) {
-        milestone.status = "up-next";
-      }
-    }
-  }
-
-  const hasActiveMilestone = nextMilestones.some((milestone) => milestone.status === "active");
-  if (!hasActiveMilestone) {
-    const nextAvailableMilestone = [...nextMilestones]
-      .sort((left, right) => left.sort_order - right.sort_order)
-      .find((milestone) => milestone.status !== "done");
-
-    if (nextAvailableMilestone) {
-      nextAvailableMilestone.status = "active";
-    }
-  }
-
-  return nextMilestones;
+  return enforceMilestoneSequence(nextMilestones);
 }
 
 function revalidateApp() {
@@ -176,6 +184,10 @@ export async function createGoalAction(
   return { message: "Goal added." };
 }
 
+export async function createSuggestedGoalAction(formData: FormData) {
+  await createGoalAction({ message: "" }, formData);
+}
+
 export async function createMilestoneAction(
   _: ActionState,
   formData: FormData,
@@ -233,6 +245,89 @@ export async function createMilestoneAction(
 
 export async function createSuggestedMilestoneAction(formData: FormData) {
   await createMilestoneAction({ message: "" }, formData);
+}
+
+export async function deleteGoalAction(formData: FormData) {
+  const { supabase } = await getSupabaseOrThrow();
+
+  const goalId = getTrimmedField(formData, "goal_id");
+
+  if (!goalId) {
+    return;
+  }
+
+  const { data: goal, error: goalError } = await supabase
+    .from("goals")
+    .select("id")
+    .eq("id", goalId)
+    .maybeSingle();
+
+  if (goalError || !goal) {
+    return;
+  }
+
+  const { error } = await supabase.from("goals").delete().eq("id", goalId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidateApp();
+}
+
+export async function deleteMilestoneAction(formData: FormData) {
+  const { supabase } = await getSupabaseOrThrow();
+
+  const milestoneId = getTrimmedField(formData, "milestone_id");
+
+  if (!milestoneId) {
+    return;
+  }
+
+  const { data: milestone, error: milestoneError } = await supabase
+    .from("milestones")
+    .select("id,goal_id")
+    .eq("id", milestoneId)
+    .maybeSingle();
+
+  if (milestoneError || !milestone) {
+    return;
+  }
+
+  const { error: deleteError } = await supabase.from("milestones").delete().eq("id", milestoneId);
+
+  if (deleteError) {
+    throw new Error(deleteError.message);
+  }
+
+  const { data: remainingMilestones, error: remainingError } = await supabase
+    .from("milestones")
+    .select("id,status,sort_order")
+    .eq("goal_id", milestone.goal_id)
+    .order("sort_order", { ascending: true });
+
+  if (remainingError) {
+    throw new Error(remainingError.message);
+  }
+
+  const normalizedMilestones = enforceMilestoneSequence((remainingMilestones ?? []) as MilestoneRecord[]);
+
+  await Promise.all(
+    normalizedMilestones.map(async ({ id, status, sort_order }) => {
+      const { error: updateError } = await supabase
+        .from("milestones")
+        .update({ status, sort_order })
+        .eq("id", id);
+
+      if (updateError) {
+        throw new Error(updateError.message);
+      }
+    }),
+  );
+
+  await syncGoalProgress(supabase, milestone.goal_id);
+
+  revalidateApp();
 }
 
 export async function updateMilestoneStatusAction(formData: FormData) {
@@ -302,6 +397,20 @@ export async function createHabitAction(
     return { message: "Habit name is required." };
   }
 
+  const { data: existingHabit, error: existingHabitError } = await supabase
+    .from("habits")
+    .select("id")
+    .eq("name", name)
+    .maybeSingle();
+
+  if (existingHabitError) {
+    return { message: existingHabitError.message };
+  }
+
+  if (existingHabit) {
+    return { message: "Habit already exists." };
+  }
+
   const { error } = await supabase.from("habits").insert({
     owner_id: userId,
     name,
@@ -314,6 +423,10 @@ export async function createHabitAction(
 
   revalidateApp();
   return { message: "Habit added." };
+}
+
+export async function createSuggestedHabitAction(formData: FormData) {
+  await createHabitAction({ message: "" }, formData);
 }
 
 export async function logHabitAction(formData: FormData) {
