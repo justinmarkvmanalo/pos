@@ -51,24 +51,53 @@ export default async function HabitsPage() {
         </div>
 
         <div className="grid content-start auto-rows-max gap-6 self-start">
-          {habits.summaries.length === 0 ? (
-            <article className="panel self-start rounded-[2rem] p-6 text-sm text-ink-soft">
-              No habits yet. Add your first one above and choose how many times per week it should happen.
-            </article>
-          ) : null}
-          {habits.summaries.map((habit) => (
-            <article key={habit.id} className="panel self-start rounded-[2rem] p-6">
-              <p className="text-sm uppercase tracking-[0.16em] text-ink-soft">{habit.name}</p>
-              <p className="mt-3 text-4xl font-semibold">{habit.currentRun} days</p>
-              <p className="mt-2 text-sm text-ink-soft">
-                Target: {getHabitFrequencyLabel(habit.targetFrequency)}
-              </p>
-              <p className="mt-1 text-sm text-ink-soft">
-                This week: {habit.completedThisWeek} of {habit.targetFrequency} done.
-              </p>
-              <HabitLogButton habitId={habit.id} />
-            </article>
-          ))}
+          <article className="panel rounded-[2rem] p-6">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm uppercase tracking-[0.16em] text-ink-soft">Habit pulse</p>
+                <p className="mt-2 text-sm leading-6 text-ink-soft">
+                  Weekly pace, current streak, and today&apos;s log stay in one compact block.
+                </p>
+              </div>
+              <div className="rounded-full border border-border bg-surface-strong px-3 py-1 text-sm text-ink-soft">
+                {habits.completionRate}% hit rate
+              </div>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              {habits.summaries.length === 0 ? (
+                <div className="rounded-[1.25rem] bg-surface-strong p-4 text-sm text-ink-soft">
+                  No habits yet. Add your first one above and choose how many times per week it should happen.
+                </div>
+              ) : null}
+              {habits.summaries.map((habit) => (
+                <div key={habit.id} className="rounded-[1.25rem] bg-surface-strong p-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-medium">{habit.name}</p>
+                      <p className="mt-1 text-sm text-ink-soft">
+                        This week: {habit.completedThisWeek} of {habit.targetFrequency}
+                      </p>
+                    </div>
+                    <span className="rounded-full bg-[#f2e4d7] px-3 py-1 text-sm font-medium text-[#6d4d31]">
+                      {habit.currentRun} day{habit.currentRun === 1 ? "" : "s"}
+                    </span>
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                    <p className="text-sm text-ink-soft">
+                      Target: {getHabitFrequencyLabel(habit.targetFrequency)}
+                    </p>
+                    <HabitLogButton
+                      habitId={habit.id}
+                      formClassName=""
+                      buttonClassName="inline-flex w-fit rounded-full border border-border bg-[#fff8ef] px-3 py-1.5 text-sm font-semibold text-foreground transition hover:border-accent disabled:opacity-60"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </article>
         </div>
       </section>
     </AppShell>

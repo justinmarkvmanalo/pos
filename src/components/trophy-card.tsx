@@ -100,9 +100,6 @@ export function TrophyCard({ trophy }: { trophy: GoalTrophy }) {
           </p>
           <p className="mt-1 text-sm font-semibold text-[#4f3610]">{trophy.title}</p>
           <p className="mt-2 text-sm leading-6 text-[#6d5321]">{trophy.summary}</p>
-          <p className="mt-2 text-[11px] uppercase tracking-[0.16em] text-[#977326]">
-            Inspired by a CC0 trophy artwork from Wikimedia/OpenClipart
-          </p>
         </div>
       </div>
     </div>
