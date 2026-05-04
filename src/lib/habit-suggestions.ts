@@ -67,3 +67,10 @@ export function groupHabitSuggestions() {
     suggestions,
   }));
 }
+
+export function getHabitCategory(name: string) {
+  const normalized = name.trim().toLowerCase();
+  const matchedSuggestion = habitSuggestions.find((suggestion) => suggestion.name.toLowerCase() === normalized);
+
+  return matchedSuggestion?.category ?? "Custom";
+}
