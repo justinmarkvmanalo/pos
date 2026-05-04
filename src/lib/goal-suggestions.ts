@@ -30,6 +30,16 @@ const suggestionSets = [
     ],
   },
   {
+    keywords: ["job order", "requirements", "clearance", "approval", "submit", "submission"],
+    suggestions: [
+      "List the exact job order requirements and deadline",
+      "Prepare every required document before submission day",
+      "Finish the highest-risk requirement first",
+      "Submit the complete job order packet and confirm receipt",
+      "Follow up on the approval status before the deadline",
+    ],
+  },
+  {
     keywords: ["fitness", "workout", "gym", "health", "weight", "muscle", "run"],
     suggestions: [
       "Set a measurable target and a deadline",

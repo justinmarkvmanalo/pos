@@ -5,7 +5,6 @@ import { GoalCreateControls } from "@/components/goal-create-controls";
 import { GoalSettingsPanel } from "@/components/goal-settings-panel";
 import { MilestoneDeleteForm } from "@/components/milestone-delete-form";
 import { MilestoneForm } from "@/components/milestone-form";
-import { MilestoneSuggestionForm } from "@/components/milestone-suggestion-form";
 import { MilestoneStatusForm } from "@/components/milestone-status-form";
 import { TrophyCard } from "@/components/trophy-card";
 import { getDashboardSnapshot } from "@/lib/data";
@@ -106,26 +105,13 @@ export default async function GoalsPage() {
                   </div>
                 ))}
               </div>
-              {goal.suggestions.length > 0 ? (
-                <div className="mt-6 rounded-[1.5rem] border border-dashed border-border bg-white/70 p-4">
-                  <p className="text-xs uppercase tracking-[0.18em] text-ink-soft">
-                    Need ideas? Start here
-                  </p>
-                  <p className="mt-2 text-sm leading-6 text-ink-soft">
-                    Tap a suggestion to turn it into a milestone for this goal.
-                  </p>
-                  <div className="mt-4 grid gap-2">
-                    {goal.suggestions.map((suggestion) => (
-                      <MilestoneSuggestionForm
-                        key={`${goal.id}-${suggestion}`}
-                        goalId={goal.id}
-                        suggestion={suggestion}
-                      />
-                    ))}
-                  </div>
-                </div>
-              ) : null}
-              <MilestoneForm goalId={goal.id} />
+              <MilestoneForm
+                goalId={goal.id}
+                goalTitle={goal.title}
+                ownerNote={goal.ownerNote}
+                existingMilestones={goal.milestones.map((milestone) => milestone.name)}
+                suggestions={goal.suggestions}
+              />
             </CollapsiblePanel>
                 </>
               );
