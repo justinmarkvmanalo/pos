@@ -8,6 +8,7 @@ export default async function ReviewPage() {
   await connection();
   const { review, goals, habits } = await getDashboardSnapshot();
   const summaryText = await buildWeeklyReviewText();
+  const previousReviews = review.history.slice(1);
 
   return (
     <AppShell>
@@ -19,22 +20,22 @@ export default async function ReviewPage() {
           <ReviewGenerateButton />
 
           <div className="mt-6 rounded-[1.5rem] bg-[#201914] p-5 text-[#fff7ef]">
-            <p className="text-xs uppercase tracking-[0.18em] text-[#d7c6b8]">Auto-summary draft</p>
+            <p className="text-xs uppercase tracking-[0.18em] text-[#d7c6b8]">Latest review summary</p>
             <p className="mt-3 text-sm leading-7">{review.latestSummary ?? summaryText}</p>
           </div>
 
           <div className="mt-6">
             <div className="flex items-center justify-between gap-4">
-              <p className="text-sm uppercase tracking-[0.18em] text-ink-soft">Saved reviews</p>
-              <span className="text-sm text-ink-soft">{review.history.length}</span>
+              <p className="text-sm uppercase tracking-[0.18em] text-ink-soft">Past reviews</p>
+              <span className="text-sm text-ink-soft">{previousReviews.length}</span>
             </div>
             <div className="mt-4 space-y-3">
-              {review.history.length === 0 ? (
+              {previousReviews.length === 0 ? (
                 <div className="rounded-[1.25rem] border border-dashed border-border bg-surface-strong p-4 text-sm text-ink-soft">
-                  No saved weekly reviews yet.
+                  No past reviews yet.
                 </div>
               ) : null}
-              {review.history.map((entry) => (
+              {previousReviews.map((entry) => (
                 <article key={entry.id} className="rounded-[1.25rem] border border-border bg-surface-strong p-4">
                   <div className="flex items-center justify-between gap-4">
                     <p className="text-sm font-medium">Week of {entry.weekOf}</p>
