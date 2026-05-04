@@ -150,12 +150,15 @@ a {
   animation: shimmer-slide 1.5s ease-in-out infinite;
 }
 
-.success-toast {
-  animation: success-toast-pop 2.6s ease forwards;
-}
-
 .confirm-modal {
   animation: confirm-modal-pop 0.22s ease-out both;
+}
+
+.success-modal {
+  animation: success-modal-pop 0.26s ease-out both;
+  box-shadow:
+    0 26px 70px rgba(47, 125, 84, 0.18),
+    0 0 0 1px rgba(184, 220, 199, 0.55);
 }
 
 .trophy-card {
@@ -247,19 +250,14 @@ a {
   }
 }
 
-@keyframes success-toast-pop {
+@keyframes success-modal-pop {
   0% {
     opacity: 0;
-    transform: translateY(-14px) scale(0.96);
-  }
-  12%,
-  78% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(18px) scale(0.96);
   }
   100% {
-    opacity: 0;
-    transform: translateY(-8px) scale(0.98);
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
