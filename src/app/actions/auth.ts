@@ -60,6 +60,7 @@ export async function signupAction(_: ActionState, formData: FormData): Promise<
     options: {
       data: {
         name,
+        avatar_url: "",
       },
     },
   });
@@ -93,15 +94,28 @@ export async function updateProfileAction(_: ActionState, formData: FormData): P
 
   const name = getTrimmedField(formData, "name");
   const email = getTrimmedField(formData, "email");
+  const avatarUrl = getTrimmedField(formData, "avatar_url");
 
   if (!name || !email) {
     return errorActionState("Name and email are required.");
+  }
+
+  if (avatarUrl) {
+    try {
+      const parsedUrl = new URL(avatarUrl);
+      if (!["http:", "https:"].includes(parsedUrl.protocol)) {
+        return errorActionState("Profile picture must use an http or https URL.");
+      }
+    } catch {
+      return errorActionState("Profile picture must be a valid URL.");
+    }
   }
 
   const { error } = await supabase.auth.updateUser({
     email,
     data: {
       name,
+      avatar_url: avatarUrl,
     },
   });
 

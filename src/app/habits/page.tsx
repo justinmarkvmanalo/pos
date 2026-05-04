@@ -63,17 +63,12 @@ export default async function HabitsPage() {
 
         <div className="grid content-start auto-rows-max gap-6 self-start">
           <article className="panel rounded-[2rem] p-6">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-sm uppercase tracking-[0.16em] text-ink-soft">Habit pulse</p>
-                <p className="mt-2 text-sm leading-6 text-ink-soft">
-                  Weekly pace, streak, and today&apos;s log are compressed into a tighter list so
-                  large habit sets stay readable.
-                </p>
-              </div>
-              <div className="rounded-full border border-border bg-surface-strong px-3 py-1 text-sm text-ink-soft">
-                {habits.completionRate}% hit rate
-              </div>
+            <div>
+              <p className="text-sm uppercase tracking-[0.16em] text-ink-soft">Habit pulse</p>
+              <p className="mt-2 text-sm leading-6 text-ink-soft">
+                Weekly pace, streak, and today&apos;s log are compressed into a tighter list so
+                large habit sets stay readable.
+              </p>
             </div>
 
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
