@@ -11,9 +11,15 @@ import { emptyActionState } from "@/lib/form-state";
 export function GoalForm({
   className,
   panelClassName,
+  open,
+  onOpenChange,
+  hideTrigger,
 }: {
   className?: string;
   panelClassName?: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  hideTrigger?: boolean;
 }) {
   const [state, formAction] = useActionState(createGoalAction, emptyActionState);
   const formRef = useRef<HTMLFormElement>(null);
@@ -30,6 +36,9 @@ export function GoalForm({
       title="New goal"
       className={className}
       panelClassName={panelClassName}
+      open={open}
+      onOpenChange={onOpenChange}
+      hideTrigger={hideTrigger}
     >
       <ActionToast state={state} />
       <form ref={formRef} action={formAction} className="space-y-3">

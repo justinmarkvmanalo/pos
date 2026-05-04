@@ -12,9 +12,15 @@ import { habitFrequencyOptions } from "@/lib/habits";
 export function HabitForm({
   className,
   panelClassName,
+  open,
+  onOpenChange,
+  hideTrigger,
 }: {
   className?: string;
   panelClassName?: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  hideTrigger?: boolean;
 }) {
   const [state, formAction] = useActionState(createHabitAction, emptyActionState);
   const formRef = useRef<HTMLFormElement>(null);
@@ -31,6 +37,9 @@ export function HabitForm({
       title="New habit"
       className={className}
       panelClassName={panelClassName}
+      open={open}
+      onOpenChange={onOpenChange}
+      hideTrigger={hideTrigger}
     >
       <ActionToast state={state} />
       <form ref={formRef} action={formAction} className="space-y-3">

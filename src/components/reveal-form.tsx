@@ -9,24 +9,41 @@ export function RevealForm({
   children,
   className,
   panelClassName,
+  open,
+  onOpenChange,
+  hideTrigger = false,
 }: {
   buttonLabel: string;
   title: string;
   children: ReactNode;
   className?: string;
   panelClassName?: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  hideTrigger?: boolean;
 }) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+  const isControlled = open !== undefined;
+  const isOpen = isControlled ? open : internalIsOpen;
+  const setIsOpen = (next: boolean | ((current: boolean) => boolean)) => {
+    const value = typeof next === "function" ? next(isOpen) : next;
+    if (!isControlled) {
+      setInternalIsOpen(value);
+    }
+    onOpenChange?.(value);
+  };
 
   return (
     <div className={className ?? "mt-5"}>
-      <button
-        type="button"
-        onClick={() => setIsOpen((current) => !current)}
-        className="rounded-full border border-border bg-surface-strong px-4 py-2 text-sm font-medium text-ink-soft transition hover:border-accent hover:text-accent-strong"
-      >
-        {isOpen ? "Close" : buttonLabel}
-      </button>
+      {hideTrigger ? null : (
+        <button
+          type="button"
+          onClick={() => setIsOpen((current) => !current)}
+          className="rounded-full border border-border bg-surface-strong px-4 py-2 text-sm font-medium text-ink-soft transition hover:border-accent hover:text-accent-strong"
+        >
+          {isOpen ? "Close" : buttonLabel}
+        </button>
+      )}
 
       {isOpen ? (
         <div
