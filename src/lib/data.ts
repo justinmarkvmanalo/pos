@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { requireAuthContext } from "@/lib/auth";
 import { getGoalSuggestions } from "@/lib/goal-suggestions";
+import { parseStoredReviewSummary } from "@/lib/review";
 import { getSupabaseUserServerClient, hasSupabaseEnv } from "@/lib/supabase";
 import type {
   CaptureItem,
@@ -289,6 +290,8 @@ const emptySnapshot: DashboardSnapshot = {
     prompt: REVIEW_PROMPT,
     highlights: ["Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY."],
     latestSummary: null,
+    latestInsight: null,
+    histogram: [],
     history: [],
   },
   captures: [],
@@ -385,6 +388,23 @@ export const getDashboardSnapshot = cache(async (): Promise<DashboardSnapshot> =
   );
   const reviewHistory = (reviewResult.data ?? []) as WeeklyReviewRow[];
   const latestReview = reviewHistory[0] ?? null;
+  const parsedReviewHistory = reviewHistory.map((entry) => {
+    const parsed = parseStoredReviewSummary(entry.summary);
+
+    return {
+      id: entry.id,
+      weekOf: formatReviewWeekLabel(entry.week_of),
+      prompt: entry.prompt,
+      summary: parsed.cleanSummary,
+      score: parsed.meta?.score ?? null,
+      weeklyNote: parsed.meta?.weeklyNote ?? null,
+      trend: parsed.meta?.trend ?? null,
+      momentum: parsed.meta?.momentum ?? null,
+      friction: parsed.meta?.friction ?? null,
+      nextChange: parsed.meta?.nextChange ?? null,
+    };
+  });
+  const latestParsedReview = parsedReviewHistory[0] ?? null;
 
   return {
     isConfigured: true,
@@ -408,12 +428,42 @@ export const getDashboardSnapshot = cache(async (): Promise<DashboardSnapshot> =
       readiness: latestReview ? "Latest review saved" : "No review saved yet",
       prompt: latestReview?.prompt || REVIEW_PROMPT,
       highlights: buildReviewHighlights(focusTasks, goals, captures, habits),
-      latestSummary: latestReview?.summary ?? null,
-      history: reviewHistory.map((entry) => ({
+      latestSummary: latestParsedReview?.summary ?? null,
+      latestInsight:
+        latestParsedReview &&
+        latestParsedReview.momentum &&
+        latestParsedReview.friction &&
+        latestParsedReview.nextChange &&
+        latestParsedReview.score !== null &&
+        latestParsedReview.weeklyNote &&
+        latestParsedReview.trend
+          ? {
+              momentum: latestParsedReview.momentum,
+              friction: latestParsedReview.friction,
+              nextChange: latestParsedReview.nextChange,
+              score: latestParsedReview.score,
+              weeklyNote: latestParsedReview.weeklyNote,
+              trend: latestParsedReview.trend,
+            }
+          : null,
+      histogram: parsedReviewHistory
+        .filter((entry) => entry.score !== null && entry.weeklyNote && entry.trend)
+        .slice()
+        .reverse()
+        .map((entry) => ({
+          weekOf: entry.weekOf,
+          score: entry.score as number,
+          weeklyNote: entry.weeklyNote as string,
+          trend: entry.trend as "improved" | "steady" | "slipped",
+        })),
+      history: parsedReviewHistory.map((entry) => ({
         id: entry.id,
-        weekOf: formatReviewWeekLabel(entry.week_of),
+        weekOf: entry.weekOf,
         prompt: entry.prompt,
         summary: entry.summary,
+        score: entry.score,
+        weeklyNote: entry.weeklyNote,
+        trend: entry.trend,
       })),
     },
     captures,

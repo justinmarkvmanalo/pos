@@ -52,11 +52,28 @@ export type ReviewSummary = {
   prompt: string;
   highlights: string[];
   latestSummary: string | null;
+  latestInsight: {
+    momentum: string;
+    friction: string;
+    nextChange: string;
+    score: number;
+    weeklyNote: string;
+    trend: "improved" | "steady" | "slipped";
+  } | null;
+  histogram: {
+    weekOf: string;
+    score: number;
+    weeklyNote: string;
+    trend: "improved" | "steady" | "slipped";
+  }[];
   history: {
     id: string;
     weekOf: string;
     prompt: string;
     summary: string;
+    score: number | null;
+    weeklyNote: string | null;
+    trend: "improved" | "steady" | "slipped" | null;
   }[];
 };
 

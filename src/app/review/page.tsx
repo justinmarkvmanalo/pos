@@ -2,12 +2,13 @@ import { connection } from "next/server";
 import { AppShell } from "@/components/app-shell";
 import { ReviewGenerateButton } from "@/components/review-generate-button";
 import { getDashboardSnapshot } from "@/lib/data";
-import { buildWeeklyReviewText } from "@/lib/review";
+import { buildWeeklyReviewInsight } from "@/lib/review";
 
 export default async function ReviewPage() {
   await connection();
   const { review, goals, habits } = await getDashboardSnapshot();
-  const summaryText = await buildWeeklyReviewText();
+  const reviewInsight = await buildWeeklyReviewInsight();
+  const latestInsight = review.latestInsight ?? reviewInsight;
   const previousReviews = review.history.slice(1);
 
   return (
@@ -21,7 +22,83 @@ export default async function ReviewPage() {
 
           <div className="mt-6 rounded-[1.5rem] bg-[#201914] p-5 text-[#fff7ef]">
             <p className="text-xs uppercase tracking-[0.18em] text-[#d7c6b8]">Latest review summary</p>
-            <p className="mt-3 text-sm leading-7">{review.latestSummary ?? summaryText}</p>
+            <p className="mt-3 text-sm leading-7">{review.latestSummary ?? reviewInsight.summary}</p>
+          </div>
+
+          <div className="mt-6 rounded-[1.5rem] border border-border bg-surface-strong p-5">
+            <div className="flex items-center justify-between gap-4">
+              <p className="text-sm uppercase tracking-[0.18em] text-ink-soft">AI suggestions</p>
+              <span className="rounded-full bg-[#f2e4d7] px-3 py-1 text-sm font-medium text-[#6d4d31]">
+                Score {latestInsight.score}/100
+              </span>
+            </div>
+            <div className="mt-4 grid gap-3">
+              <div className="rounded-[1.25rem] bg-white/70 p-4">
+                <p className="text-xs uppercase tracking-[0.18em] text-ink-soft">Momentum</p>
+                <p className="mt-2 text-sm leading-7">{latestInsight.momentum}</p>
+              </div>
+              <div className="rounded-[1.25rem] bg-white/70 p-4">
+                <p className="text-xs uppercase tracking-[0.18em] text-ink-soft">Friction</p>
+                <p className="mt-2 text-sm leading-7">{latestInsight.friction}</p>
+              </div>
+              <div className="rounded-[1.25rem] bg-white/70 p-4">
+                <p className="text-xs uppercase tracking-[0.18em] text-ink-soft">Change before next Monday</p>
+                <p className="mt-2 text-sm leading-7">{latestInsight.nextChange}</p>
+              </div>
+              <div className="rounded-[1.25rem] bg-white/70 p-4">
+                <p className="text-xs uppercase tracking-[0.18em] text-ink-soft">Weekly note</p>
+                <p className="mt-2 text-sm leading-7">{latestInsight.weeklyNote}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 rounded-[1.5rem] border border-border bg-surface-strong p-5">
+            <div className="flex items-center justify-between gap-4">
+              <p className="text-sm uppercase tracking-[0.18em] text-ink-soft">Weekly improvement</p>
+              <span className="text-sm text-ink-soft">{review.histogram.length} weeks</span>
+            </div>
+            {review.histogram.length === 0 ? (
+              <div className="mt-4 rounded-[1.25rem] border border-dashed border-border bg-white/70 p-4 text-sm text-ink-soft">
+                Generate at least one new review to start building the weekly histogram.
+              </div>
+            ) : (
+              <div className="mt-4">
+                <div className="flex h-52 items-end gap-3 overflow-x-auto pb-2">
+                  {review.histogram.map((entry) => (
+                    <div key={entry.weekOf} className="flex min-w-[4.5rem] flex-1 flex-col items-center gap-2">
+                      <div className="text-xs font-medium text-ink-soft">{entry.score}</div>
+                      <div className="flex h-40 w-full items-end">
+                        <div
+                          className={`w-full rounded-t-[1rem] ${
+                            entry.trend === "improved"
+                              ? "bg-[linear-gradient(180deg,#6ec28f_0%,#2f7d54_100%)]"
+                              : entry.trend === "steady"
+                                ? "bg-[linear-gradient(180deg,#e4c27a_0%,#b88932_100%)]"
+                                : "bg-[linear-gradient(180deg,#e59b86_0%,#b84c2f_100%)]"
+                          }`}
+                          style={{ height: `${Math.max(16, entry.score)}%` }}
+                          title={`${entry.weekOf}: ${entry.score} - ${entry.weeklyNote}`}
+                        />
+                      </div>
+                      <div className="text-center text-[11px] uppercase tracking-[0.14em] text-ink-soft">
+                        {entry.weekOf}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 grid gap-3">
+                  {review.histogram.map((entry) => (
+                    <div key={`${entry.weekOf}-note`} className="rounded-[1.25rem] bg-white/70 p-4">
+                      <div className="flex items-center justify-between gap-4">
+                        <p className="text-sm font-medium">{entry.weekOf}</p>
+                        <span className="text-sm text-ink-soft">{entry.score}/100</span>
+                      </div>
+                      <p className="mt-2 text-sm leading-7">{entry.weeklyNote}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="mt-6">

@@ -1,27 +1,184 @@
 import { getDashboardSnapshot } from "@/lib/data";
 
-function buildFallbackReviewText(snapshot: Awaited<ReturnType<typeof getDashboardSnapshot>>) {
+export type WeeklyReviewInsight = {
+  summary: string;
+  momentum: string;
+  friction: string;
+  nextChange: string;
+  score: number;
+  weeklyNote: string;
+  trend: "improved" | "steady" | "slipped";
+};
+
+const REVIEW_META_MARKER = "[[WINOS_REVIEW_META]]";
+
+function clampScore(value: number) {
+  return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+function getFallbackScore(snapshot: Awaited<ReturnType<typeof getDashboardSnapshot>>) {
+  const habitScore = snapshot.habits.completionRate;
+  const goalScore =
+    snapshot.goals.length === 0
+      ? 50
+      : Math.round(snapshot.goals.reduce((total, goal) => total + goal.progress, 0) / snapshot.goals.length);
+  const focusScore =
+    snapshot.dailyFocus.topTasks.length === 0
+      ? 50
+      : Math.round((snapshot.dailyFocus.completedTasks / snapshot.dailyFocus.topTasks.length) * 100);
+
+  return clampScore(Math.round(habitScore * 0.45 + goalScore * 0.35 + focusScore * 0.2));
+}
+
+function getTrendFromScore(score: number) {
+  if (score >= 70) {
+    return "improved" as const;
+  }
+
+  if (score >= 45) {
+    return "steady" as const;
+  }
+
+  return "slipped" as const;
+}
+
+function encodeReviewInsight(insight: WeeklyReviewInsight) {
+  return `${insight.summary}\n\n${REVIEW_META_MARKER}${JSON.stringify({
+    momentum: insight.momentum,
+    friction: insight.friction,
+    nextChange: insight.nextChange,
+    score: insight.score,
+    weeklyNote: insight.weeklyNote,
+    trend: insight.trend,
+  })}`;
+}
+
+export function parseStoredReviewSummary(summary: string) {
+  const markerIndex = summary.indexOf(REVIEW_META_MARKER);
+
+  if (markerIndex === -1) {
+    return {
+      cleanSummary: summary.trim(),
+      meta: null,
+    };
+  }
+
+  const cleanSummary = summary.slice(0, markerIndex).trim();
+  const rawMeta = summary.slice(markerIndex + REVIEW_META_MARKER.length).trim();
+
+  try {
+    const parsed = JSON.parse(rawMeta) as Partial<Omit<WeeklyReviewInsight, "summary">>;
+    if (
+      typeof parsed.momentum === "string" &&
+      typeof parsed.friction === "string" &&
+      typeof parsed.nextChange === "string" &&
+      typeof parsed.score === "number" &&
+      typeof parsed.weeklyNote === "string" &&
+      (parsed.trend === "improved" || parsed.trend === "steady" || parsed.trend === "slipped")
+    ) {
+      return {
+        cleanSummary,
+        meta: {
+          momentum: parsed.momentum.trim(),
+          friction: parsed.friction.trim(),
+          nextChange: parsed.nextChange.trim(),
+          score: clampScore(parsed.score),
+          weeklyNote: parsed.weeklyNote.trim(),
+          trend: parsed.trend,
+        },
+      };
+    }
+  } catch {
+    return {
+      cleanSummary,
+      meta: null,
+    };
+  }
+
+  return {
+    cleanSummary,
+    meta: null,
+  };
+}
+
+function buildFallbackReviewInsight(
+  snapshot: Awaited<ReturnType<typeof getDashboardSnapshot>>,
+): WeeklyReviewInsight {
   const activeGoal = snapshot.goals[0];
   const latestGoalLine = activeGoal
     ? `Primary goal: ${activeGoal.title} is ${activeGoal.progress}% complete.`
     : "Primary goal: no goals have been added yet.";
 
-  return [
-    `Weekly review for ${snapshot.dailyFocus.dateLabel}.`,
-    `Completion: ${snapshot.habits.completionRate}% across tracked habits.`,
-    latestGoalLine,
-    `Focus tasks completed today: ${snapshot.dailyFocus.completedTasks}.`,
-    `Reflection prompt: ${snapshot.review.prompt}`,
-  ].join(" ");
+  const score = getFallbackScore(snapshot);
+  const trend = getTrendFromScore(score);
+
+  return {
+    summary: [
+      `Weekly review for ${snapshot.dailyFocus.dateLabel}.`,
+      `Completion: ${snapshot.habits.completionRate}% across tracked habits.`,
+      latestGoalLine,
+      `Focus tasks completed today: ${snapshot.dailyFocus.completedTasks}.`,
+      `Reflection prompt: ${snapshot.review.prompt}`,
+    ].join(" "),
+    momentum:
+      snapshot.habits.completionRate >= 60
+        ? "Habit consistency is creating momentum, and at least part of the weekly system is holding."
+        : "Momentum is limited right now, with habit consistency still below a reliable weekly pace.",
+    friction:
+      snapshot.captures.length > 0
+        ? `${snapshot.captures.length} capture items are still open, which may be adding mental drag.`
+        : "No major inbox backlog is showing, so the main friction is likely execution consistency.",
+    nextChange:
+      snapshot.goals[0]?.currentMilestone
+        ? `Before next Monday, protect time for the current milestone: ${snapshot.goals[0].currentMilestone}.`
+        : "Before next Monday, define one concrete milestone so the next week has a clear target.",
+    score,
+    weeklyNote:
+      trend === "improved"
+        ? "You improved this week. The system is moving forward and should be protected."
+        : trend === "steady"
+          ? "This week was steady. Progress is present, but the routine still needs tightening."
+          : "This week slipped. Reduce friction and simplify the next week so execution is easier.",
+    trend,
+  };
 }
 
-export async function buildWeeklyReviewText() {
+function parseStructuredInsight(raw: string): WeeklyReviewInsight | null {
+  try {
+    const parsed = JSON.parse(raw) as Partial<WeeklyReviewInsight>;
+    if (
+      typeof parsed.summary === "string" &&
+      typeof parsed.momentum === "string" &&
+      typeof parsed.friction === "string" &&
+      typeof parsed.nextChange === "string" &&
+      typeof parsed.score === "number" &&
+      typeof parsed.weeklyNote === "string" &&
+      (parsed.trend === "improved" || parsed.trend === "steady" || parsed.trend === "slipped")
+    ) {
+      return {
+        summary: parsed.summary.trim(),
+        momentum: parsed.momentum.trim(),
+        friction: parsed.friction.trim(),
+        nextChange: parsed.nextChange.trim(),
+        score: clampScore(parsed.score),
+        weeklyNote: parsed.weeklyNote.trim(),
+        trend: parsed.trend,
+      };
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
+export async function buildWeeklyReviewInsight(): Promise<WeeklyReviewInsight> {
   const snapshot = await getDashboardSnapshot();
-  const fallbackText = buildFallbackReviewText(snapshot);
+  const fallbackInsight = buildFallbackReviewInsight(snapshot);
   const groqApiKey = process.env.GROQ_API_KEY;
 
   if (!groqApiKey) {
-    return fallbackText;
+    return fallbackInsight;
   }
 
   const model = process.env.GROQ_MODEL || "llama-3.1-8b-instant";
@@ -56,7 +213,7 @@ export async function buildWeeklyReviewText() {
           {
             role: "system",
             content:
-              "You are an operating review assistant. Write concise weekly reviews grounded only in the data provided. Keep it to one short paragraph plus 2 to 4 short bullet-style sentences. Mention momentum, friction, and the next adjustment to make.",
+              "You are an operating review assistant. Return only valid JSON with exactly these string keys: summary, momentum, friction, nextChange, score, weeklyNote, trend. Ground everything only in the provided data. Keep each field concise and specific. score must be a number from 0 to 100. trend must be exactly one of: improved, steady, slipped. weeklyNote must say whether the user improved or not this week.",
           },
           {
             role: "user",
@@ -82,16 +239,22 @@ export async function buildWeeklyReviewText() {
     });
 
     if (!response.ok) {
-      return fallbackText;
+      return fallbackInsight;
     }
 
     const data = (await response.json()) as {
       choices?: Array<{ message?: { content?: string | null } }>;
     };
     const content = data.choices?.[0]?.message?.content?.trim();
+    const structuredInsight = content ? parseStructuredInsight(content) : null;
 
-    return content || fallbackText;
+    return structuredInsight || fallbackInsight;
   } catch {
-    return fallbackText;
+    return fallbackInsight;
   }
+}
+
+export async function buildWeeklyReviewText() {
+  const insight = await buildWeeklyReviewInsight();
+  return encodeReviewInsight(insight);
 }
