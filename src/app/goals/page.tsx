@@ -34,6 +34,7 @@ export default async function GoalsPage() {
             title="Goal idea library"
             description="This keeps manual goal creation, but also gives you many example goals you can add with one click and customize later with milestones and notes."
             className="mt-0 rounded-[1.5rem] border border-dashed border-border bg-surface-strong p-4"
+            compactTrigger
           >
             <div className="mt-4 grid gap-4">
               {goalExampleGroups.map((group) => (

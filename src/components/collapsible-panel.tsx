@@ -10,6 +10,7 @@ export function CollapsiblePanel({
   defaultOpen = false,
   children,
   className,
+  compactTrigger = false,
 }: {
   buttonLabel: string;
   title: string;
@@ -17,8 +18,23 @@ export function CollapsiblePanel({
   defaultOpen?: boolean;
   children: ReactNode;
   className?: string;
+  compactTrigger?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
+
+  if (compactTrigger && !isOpen) {
+    return (
+      <div className={className ?? "mt-6"}>
+        <button
+          type="button"
+          onClick={() => setIsOpen(true)}
+          className="rounded-full border border-border bg-white/70 px-4 py-2 text-sm font-medium text-ink-soft transition hover:border-accent hover:text-accent-strong"
+        >
+          {`Show ${buttonLabel}`}
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div

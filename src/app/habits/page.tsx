@@ -31,6 +31,7 @@ export default async function HabitsPage() {
               title="Habit idea library"
               description="This is a large built-in list of common human habits you can add with one click."
               className="mt-0 rounded-[1.5rem] border border-dashed border-border bg-surface-strong p-4"
+              compactTrigger
             >
               <div className="mt-4 grid gap-4">
                 {suggestionGroups.map((group) => (
