@@ -6,12 +6,14 @@ import { SubmitButton } from "@/components/submit-button";
 export function GoalDeadlineForm({
   goalId,
   deadline,
+  className,
 }: {
   goalId: string;
   deadline: string | null;
+  className?: string;
 }) {
   return (
-    <form action={updateGoalDeadlineAction} className="mt-4 flex flex-wrap items-end gap-3">
+    <form action={updateGoalDeadlineAction} className={className ?? "mt-4 flex flex-wrap items-end gap-3"}>
       <input type="hidden" name="goal_id" value={goalId} />
       <label className="flex min-w-[180px] flex-col gap-1 text-xs uppercase tracking-[0.14em] text-ink-soft">
         Deadline

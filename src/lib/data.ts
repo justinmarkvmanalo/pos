@@ -64,6 +64,19 @@ type WeeklyReviewRow = {
   prompt: string;
 };
 
+function formatReviewWeekLabel(value: string) {
+  const date = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(date);
+}
+
 const REVIEW_PROMPT =
   "What created momentum this week, what introduced friction, and what should change before next Monday?";
 
@@ -276,6 +289,7 @@ const emptySnapshot: DashboardSnapshot = {
     prompt: REVIEW_PROMPT,
     highlights: ["Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY."],
     latestSummary: null,
+    history: [],
   },
   captures: [],
 };
@@ -335,9 +349,7 @@ export const getDashboardSnapshot = cache(async (): Promise<DashboardSnapshot> =
     supabase
       .from("weekly_reviews")
       .select("id,week_of,summary,prompt")
-      .order("week_of", { ascending: false })
-      .limit(1)
-      .maybeSingle(),
+      .order("week_of", { ascending: false }),
   ]);
 
   const tasks = (tasksResult.data ?? []) as TaskRow[];
@@ -371,7 +383,8 @@ export const getDashboardSnapshot = cache(async (): Promise<DashboardSnapshot> =
         done: task.done,
       }) satisfies FocusTask,
   );
-  const latestReview = (reviewResult.data as WeeklyReviewRow | null) ?? null;
+  const reviewHistory = (reviewResult.data ?? []) as WeeklyReviewRow[];
+  const latestReview = reviewHistory[0] ?? null;
 
   return {
     isConfigured: true,
@@ -396,6 +409,12 @@ export const getDashboardSnapshot = cache(async (): Promise<DashboardSnapshot> =
       prompt: latestReview?.prompt || REVIEW_PROMPT,
       highlights: buildReviewHighlights(focusTasks, goals, captures, habits),
       latestSummary: latestReview?.summary ?? null,
+      history: reviewHistory.map((entry) => ({
+        id: entry.id,
+        weekOf: formatReviewWeekLabel(entry.week_of),
+        prompt: entry.prompt,
+        summary: entry.summary,
+      })),
     },
     captures,
   };

@@ -8,7 +8,13 @@ import { RevealForm } from "@/components/reveal-form";
 import { SubmitButton } from "@/components/submit-button";
 import { emptyActionState } from "@/lib/form-state";
 
-export function GoalForm() {
+export function GoalForm({
+  className,
+  panelClassName,
+}: {
+  className?: string;
+  panelClassName?: string;
+}) {
   const [state, formAction] = useActionState(createGoalAction, emptyActionState);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -19,7 +25,12 @@ export function GoalForm() {
   }, [state]);
 
   return (
-    <RevealForm buttonLabel="Add goal" title="New goal">
+    <RevealForm
+      buttonLabel="Add goal"
+      title="New goal"
+      className={className}
+      panelClassName={panelClassName}
+    >
       <ActionToast state={state} />
       <form ref={formRef} action={formAction} className="space-y-3">
         <input

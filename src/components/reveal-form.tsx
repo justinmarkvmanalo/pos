@@ -7,15 +7,19 @@ export function RevealForm({
   buttonLabel,
   title,
   children,
+  className,
+  panelClassName,
 }: {
   buttonLabel: string;
   title: string;
   children: ReactNode;
+  className?: string;
+  panelClassName?: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="mt-5">
+    <div className={className ?? "mt-5"}>
       <button
         type="button"
         onClick={() => setIsOpen((current) => !current)}
@@ -25,7 +29,11 @@ export function RevealForm({
       </button>
 
       {isOpen ? (
-        <div className="mt-4 rounded-[1.5rem] border border-border bg-surface-strong p-4">
+        <div
+          className={
+            panelClassName ?? "mt-4 rounded-[1.5rem] border border-border bg-surface-strong p-4"
+          }
+        >
           <p className="text-sm font-semibold">{title}</p>
           <div className="mt-4">{children}</div>
         </div>

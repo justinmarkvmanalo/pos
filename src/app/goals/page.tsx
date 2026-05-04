@@ -1,10 +1,9 @@
 import { connection } from "next/server";
 import { AppShell } from "@/components/app-shell";
 import { CollapsiblePanel } from "@/components/collapsible-panel";
-import { GoalDeadlineForm } from "@/components/goal-deadline-form";
 import { GoalExampleForm } from "@/components/goal-example-form";
 import { GoalForm } from "@/components/goal-form";
-import { GoalDeleteForm } from "@/components/goal-delete-form";
+import { GoalSettingsPanel } from "@/components/goal-settings-panel";
 import { MilestoneDeleteForm } from "@/components/milestone-delete-form";
 import { MilestoneForm } from "@/components/milestone-form";
 import { MilestoneSuggestionForm } from "@/components/milestone-suggestion-form";
@@ -28,30 +27,33 @@ export default async function GoalsPage() {
           Goals stay concrete here: write the outcome once, break it into milestones, and let the
           app calculate progress from what is actually finished.
         </p>
-        <GoalForm />
-        <CollapsiblePanel
-          buttonLabel="Goal idea library"
-          title="Goal idea library"
-          description="This keeps manual goal creation, but also gives you many example goals you can add with one click and customize later with milestones and notes."
-        >
-          <div className="mt-4 grid gap-4">
-            {goalExampleGroups.map((group) => (
-              <div key={group.category}>
-                <p className="text-xs uppercase tracking-[0.18em] text-ink-soft">{group.category}</p>
-                <div className="mt-2 grid gap-2 sm:grid-cols-2">
-                  {group.examples.map((example) => (
-                    <GoalExampleForm
-                      key={example.title}
-                      title={example.title}
-                      ownerNote={example.ownerNote}
-                      starterMilestones={example.starterMilestones}
-                    />
-                  ))}
+        <div className="mt-5 flex flex-wrap items-start gap-3">
+          <GoalForm className="mt-0" panelClassName="mt-4 rounded-[1.5rem] border border-border bg-surface-strong p-4" />
+          <CollapsiblePanel
+            buttonLabel="Goal idea library"
+            title="Goal idea library"
+            description="This keeps manual goal creation, but also gives you many example goals you can add with one click and customize later with milestones and notes."
+            className="mt-0 rounded-[1.5rem] border border-dashed border-border bg-surface-strong p-4"
+          >
+            <div className="mt-4 grid gap-4">
+              {goalExampleGroups.map((group) => (
+                <div key={group.category}>
+                  <p className="text-xs uppercase tracking-[0.18em] text-ink-soft">{group.category}</p>
+                  <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                    {group.examples.map((example) => (
+                      <GoalExampleForm
+                        key={example.title}
+                        title={example.title}
+                        ownerNote={example.ownerNote}
+                        starterMilestones={example.starterMilestones}
+                      />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </CollapsiblePanel>
+              ))}
+            </div>
+          </CollapsiblePanel>
+        </div>
       </section>
 
       <section className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
@@ -91,10 +93,8 @@ export default async function GoalsPage() {
                     Failed
                   </span>
                 ) : null}
+                <GoalSettingsPanel goalId={goal.id} deadline={goal.deadline} />
               </div>
-            </div>
-            <div className="mt-4">
-              <GoalDeleteForm goalId={goal.id} />
             </div>
             <div className="mt-5 h-3 overflow-hidden rounded-full bg-[#eadbc9]">
               <div
@@ -103,7 +103,6 @@ export default async function GoalsPage() {
               />
             </div>
             <p className="mt-4 text-sm leading-6 text-ink-soft">{goal.ownerNote}</p>
-            <GoalDeadlineForm goalId={goal.id} deadline={goal.deadline} />
             <CollapsiblePanel
               buttonLabel="Milestones"
               title="Milestones"

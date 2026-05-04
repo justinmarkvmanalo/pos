@@ -9,17 +9,23 @@ export function CollapsiblePanel({
   description,
   defaultOpen = false,
   children,
+  className,
 }: {
   buttonLabel: string;
   title: string;
   description?: string;
   defaultOpen?: boolean;
   children: ReactNode;
+  className?: string;
 }) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <div className="mt-6 rounded-[1.5rem] border border-dashed border-border bg-surface-strong p-4">
+    <div
+      className={
+        className ?? "mt-6 rounded-[1.5rem] border border-dashed border-border bg-surface-strong p-4"
+      }
+    >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-sm font-semibold">{title}</p>

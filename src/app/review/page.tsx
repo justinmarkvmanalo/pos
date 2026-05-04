@@ -23,6 +23,29 @@ export default async function ReviewPage() {
             <p className="mt-3 text-sm leading-7">{review.latestSummary ?? summaryText}</p>
           </div>
 
+          <div className="mt-6">
+            <div className="flex items-center justify-between gap-4">
+              <p className="text-sm uppercase tracking-[0.18em] text-ink-soft">Saved reviews</p>
+              <span className="text-sm text-ink-soft">{review.history.length}</span>
+            </div>
+            <div className="mt-4 space-y-3">
+              {review.history.length === 0 ? (
+                <div className="rounded-[1.25rem] border border-dashed border-border bg-surface-strong p-4 text-sm text-ink-soft">
+                  No saved weekly reviews yet.
+                </div>
+              ) : null}
+              {review.history.map((entry) => (
+                <article key={entry.id} className="rounded-[1.25rem] border border-border bg-surface-strong p-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <p className="text-sm font-medium">Week of {entry.weekOf}</p>
+                  </div>
+                  <p className="mt-2 text-sm text-ink-soft">{entry.prompt}</p>
+                  <p className="mt-3 text-sm leading-7">{entry.summary}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+
           <div className="mt-6 space-y-3">
             {review.highlights.length === 0 ? (
               <div className="rounded-[1.25rem] border border-dashed border-border bg-surface-strong p-4 text-sm text-ink-soft">

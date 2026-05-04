@@ -9,7 +9,13 @@ import { SubmitButton } from "@/components/submit-button";
 import { emptyActionState } from "@/lib/form-state";
 import { habitFrequencyOptions } from "@/lib/habits";
 
-export function HabitForm() {
+export function HabitForm({
+  className,
+  panelClassName,
+}: {
+  className?: string;
+  panelClassName?: string;
+}) {
   const [state, formAction] = useActionState(createHabitAction, emptyActionState);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -20,7 +26,12 @@ export function HabitForm() {
   }, [state]);
 
   return (
-    <RevealForm buttonLabel="Add habit" title="New habit">
+    <RevealForm
+      buttonLabel="Add habit"
+      title="New habit"
+      className={className}
+      panelClassName={panelClassName}
+    >
       <ActionToast state={state} />
       <form ref={formRef} action={formAction} className="space-y-3">
         <input

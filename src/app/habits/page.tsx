@@ -24,29 +24,32 @@ export default async function HabitsPage() {
             Each habit has a weekly target, like every day or three times a week. You only need to
             log the days you did it, and the page shows whether you are on pace.
           </p>
-          <HabitForm />
-          <CollapsiblePanel
-            buttonLabel="Habit idea library"
-            title="Habit idea library"
-            description="This is a large built-in list of common human habits you can add with one click."
-          >
-            <div className="mt-4 grid gap-4">
-              {suggestionGroups.map((group) => (
-                <div key={group.category}>
-                  <p className="text-xs uppercase tracking-[0.18em] text-ink-soft">{group.category}</p>
-                  <div className="mt-2 grid gap-2 sm:grid-cols-2">
-                    {group.suggestions.map((suggestion) => (
-                      <HabitSuggestionForm
-                        key={suggestion.name}
-                        name={suggestion.name}
-                        targetFrequency={suggestion.targetFrequency}
-                      />
-                    ))}
+          <div className="mt-5 flex flex-wrap items-start gap-3">
+            <HabitForm className="mt-0" panelClassName="mt-4 rounded-[1.5rem] border border-border bg-surface-strong p-4" />
+            <CollapsiblePanel
+              buttonLabel="Habit idea library"
+              title="Habit idea library"
+              description="This is a large built-in list of common human habits you can add with one click."
+              className="mt-0 rounded-[1.5rem] border border-dashed border-border bg-surface-strong p-4"
+            >
+              <div className="mt-4 grid gap-4">
+                {suggestionGroups.map((group) => (
+                  <div key={group.category}>
+                    <p className="text-xs uppercase tracking-[0.18em] text-ink-soft">{group.category}</p>
+                    <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                      {group.suggestions.map((suggestion) => (
+                        <HabitSuggestionForm
+                          key={suggestion.name}
+                          name={suggestion.name}
+                          targetFrequency={suggestion.targetFrequency}
+                        />
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </CollapsiblePanel>
+                ))}
+              </div>
+            </CollapsiblePanel>
+          </div>
           <Heatmap entries={habits.heatmap} />
         </div>
 

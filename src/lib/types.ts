@@ -52,6 +52,12 @@ export type ReviewSummary = {
   prompt: string;
   highlights: string[];
   latestSummary: string | null;
+  history: {
+    id: string;
+    weekOf: string;
+    prompt: string;
+    summary: string;
+  }[];
 };
 
 export type CaptureItem = {
