@@ -21,7 +21,7 @@ export default async function LoginPage() {
         <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.95),transparent)]" />
         <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
           <div>
-            <p className="text-sm uppercase tracking-[0.24em] text-accent-strong">Life OS</p>
+            <p className="text-sm uppercase tracking-[0.24em] text-accent-strong">winos</p>
             <h1 className="display mt-3 max-w-3xl text-4xl leading-tight sm:text-5xl lg:text-6xl">
               Personal data deserves a private command center.
             </h1>

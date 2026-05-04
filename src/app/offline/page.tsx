@@ -5,7 +5,7 @@ export default function OfflinePage() {
         <p className="text-sm uppercase tracking-[0.2em] text-ink-soft">Offline</p>
         <h1 className="display mt-2 text-4xl">You are offline</h1>
         <p className="mt-4 text-base leading-7 text-ink-soft">
-          Life OS needs a connection to sync your account data. Reconnect and reopen the app to continue.
+          winos needs a connection to sync your account data. Reconnect and reopen the app to continue.
         </p>
       </section>
     </main>

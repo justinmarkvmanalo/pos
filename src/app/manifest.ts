@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Life OS",
-    short_name: "Life OS",
+    name: "winos",
+    short_name: "winos",
     description: "A personal command center for focus, goals, habits, capture, and weekly reviews.",
     start_url: "/",
     scope: "/",

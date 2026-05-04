@@ -3,13 +3,13 @@ import { PwaRegister } from "@/components/pwa-register";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Life OS",
+  title: "winos",
   description: "A personal command center for focus, goals, habits, capture, and weekly reviews.",
-  applicationName: "Life OS",
+  applicationName: "winos",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Life OS",
+    title: "winos",
   },
   formatDetection: {
     telephone: false,

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { logoutAction } from "@/app/actions/auth";
@@ -15,8 +16,20 @@ export async function AppShell({ children }: { children: ReactNode }) {
       <header className="panel-raised soft-enter sticky top-4 z-10 hidden rounded-[1.75rem] px-5 py-4 md:block">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0">
-            <p className="text-xs uppercase tracking-[0.28em] text-ink-soft">Life OS</p>
-            <p className="display mt-1 text-2xl">Personal Command Center</p>
+            <div className="flex items-center gap-3">
+              <Image
+                src="/winos-logo.png"
+                alt="winos logo"
+                className="h-11 w-11 rounded-2xl border border-border bg-white/80 object-cover"
+                width={44}
+                height={44}
+                priority
+              />
+              <div className="min-w-0">
+                <p className="text-xs uppercase tracking-[0.28em] text-ink-soft">winos</p>
+                <p className="display mt-1 text-2xl">Personal Command Center</p>
+              </div>
+            </div>
           </div>
           <div className="flex flex-col gap-3 lg:items-end">
             <nav className="hidden flex-wrap gap-2 md:flex">
