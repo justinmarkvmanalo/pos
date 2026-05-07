@@ -49,17 +49,15 @@ self.addEventListener("fetch", (event) => {
         return cached;
       }
 
-      return fetch(event.request)
-        .then((response) => {
-          if (!response || response.status !== 200 || response.type !== "basic") {
-            return response;
-          }
-
-          const responseClone = response.clone();
-          void caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
+      return fetch(event.request).then((response) => {
+        if (!response || response.status !== 200 || response.type !== "basic") {
           return response;
-        })
-        .catch(() => Response.error());
+        }
+
+        const responseClone = response.clone();
+        void caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
+        return response;
+      });
     }),
   );
 });
