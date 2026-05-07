@@ -1,5 +1,6 @@
 import { connection } from "next/server";
 import { AppShell } from "@/components/app-shell";
+import { CaptureImageGenerator } from "@/components/capture-image-generator";
 import { QuickCaptureForm } from "@/components/quick-capture-form";
 import { getDashboardSnapshot } from "@/lib/data";
 
@@ -31,6 +32,10 @@ export default async function CapturePage() {
           <QuickCaptureForm captures={captures} />
         </div>
       </section>
+
+      <div className="mt-6">
+        <CaptureImageGenerator />
+      </div>
     </AppShell>
   );
 }
