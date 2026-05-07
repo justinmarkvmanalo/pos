@@ -52,6 +52,7 @@ export function OnboardingGuide() {
   const [isOpen, setIsOpen] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
   const [rect, setRect] = useState<DOMRect | null>(null);
+  const [viewport, setViewport] = useState({ width: 0, height: 0 });
   const guideRequested = searchParams.get("guide") === "1";
   const step = steps[stepIndex];
 
@@ -111,6 +112,10 @@ export function OnboardingGuide() {
 
       window.requestAnimationFrame(() => {
         setRect(element.getBoundingClientRect());
+        setViewport({
+          width: window.innerWidth,
+          height: window.innerHeight,
+        });
       });
     }
 
@@ -145,50 +150,48 @@ export function OnboardingGuide() {
     };
   }, [rect]);
 
+  const overlayMaskStyle = useMemo(() => {
+    if (!rect || viewport.width === 0 || viewport.height === 0) {
+      return undefined;
+    }
+
+    const x = Math.max(0, rect.left - 10);
+    const y = Math.max(0, rect.top - 10);
+    const width = rect.width + 20;
+    const height = rect.height + 20;
+    const radius = 32;
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${viewport.width} ${viewport.height}">
+        <rect width="${viewport.width}" height="${viewport.height}" fill="white"/>
+        <rect x="${x}" y="${y}" width="${width}" height="${height}" rx="${radius}" ry="${radius}" fill="black"/>
+      </svg>
+    `;
+    const maskImage = `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
+
+    return {
+      WebkitMaskImage: maskImage,
+      maskImage,
+      WebkitMaskRepeat: "no-repeat",
+      maskRepeat: "no-repeat",
+      WebkitMaskSize: "100% 100%",
+      maskSize: "100% 100%",
+    };
+  }, [rect, viewport]);
+
   if (!isOpen || pathname !== "/") {
     return null;
   }
 
   return (
     <div className="pointer-events-none fixed inset-0 z-50">
-      {rect ? (
-        <>
-          <div
-            className="absolute left-0 top-0 bg-[rgba(32,25,20,0.46)] backdrop-blur-[3px]"
-            style={{ width: "100%", height: Math.max(0, rect.top - 10) }}
-          />
-          <div
-            className="absolute left-0 bg-[rgba(32,25,20,0.46)] backdrop-blur-[3px]"
-            style={{
-              top: Math.max(0, rect.top - 10),
-              width: Math.max(0, rect.left - 10),
-              height: rect.height + 20,
-            }}
-          />
-          <div
-            className="absolute bg-[rgba(32,25,20,0.46)] backdrop-blur-[3px]"
-            style={{
-              top: Math.max(0, rect.top - 10),
-              left: rect.right + 10,
-              right: 0,
-              height: rect.height + 20,
-            }}
-          />
-          <div
-            className="absolute left-0 bottom-0 bg-[rgba(32,25,20,0.46)] backdrop-blur-[3px]"
-            style={{
-              top: rect.bottom + 10,
-              width: "100%",
-            }}
-          />
-        </>
-      ) : (
-        <div className="absolute inset-0 bg-[rgba(32,25,20,0.46)] backdrop-blur-[3px]" />
-      )}
+      <div
+        className="absolute inset-0 bg-[rgba(32,25,20,0.46)] backdrop-blur-[3px]"
+        style={overlayMaskStyle}
+      />
 
       {rect ? (
         <div
-          className="absolute rounded-[2rem] border border-white/85 shadow-[0_0_0_9999px_rgba(32,25,20,0.46),0_0_0_10px_rgba(255,247,239,0.08)] transition-all duration-300"
+          className="absolute rounded-[2rem] border border-white/85 shadow-[0_0_0_10px_rgba(255,247,239,0.08),0_22px_48px_rgba(32,25,20,0.18)] transition-all duration-300"
           style={{
             left: rect.left - 10,
             top: rect.top - 10,
