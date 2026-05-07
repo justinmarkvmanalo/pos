@@ -4,13 +4,13 @@ import { AppShell } from "@/components/app-shell";
 import { HabitCreateControls } from "@/components/habit-create-controls";
 import { Heatmap } from "@/components/heatmap";
 import { HabitLogButton } from "@/components/habit-log-button";
-import { getDashboardSnapshot } from "@/lib/data";
+import { getHabitsSnapshot } from "@/lib/data";
 import { getHabitCategory, groupHabitSuggestions } from "@/lib/habit-suggestions";
 import { getHabitFrequencyLabel } from "@/lib/habits";
 
 export default async function HabitsPage() {
   await connection();
-  const { habits } = await getDashboardSnapshot();
+  const { habits } = await getHabitsSnapshot();
   const suggestionGroups = groupHabitSuggestions();
   const activeStreaks = habits.summaries.filter((habit) => habit.currentRun > 0).length;
   const groupedHabits = Array.from(

@@ -1,12 +1,12 @@
 import { connection } from "next/server";
 import { AppShell } from "@/components/app-shell";
 import { ReviewGenerateButton } from "@/components/review-generate-button";
-import { getDashboardSnapshot } from "@/lib/data";
+import { getReviewSnapshot } from "@/lib/data";
 import { buildWeeklyReviewInsight } from "@/lib/review";
 
 export default async function ReviewPage() {
   await connection();
-  const { review, goals, habits } = await getDashboardSnapshot();
+  const { review, goals, habits } = await getReviewSnapshot();
   const reviewInsight = await buildWeeklyReviewInsight();
   const latestInsight = review.latestInsight ?? reviewInsight;
   const previousReviews = review.history.slice(1);

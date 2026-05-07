@@ -65,6 +65,11 @@ type WeeklyReviewRow = {
   prompt: string;
 };
 
+type SnapshotAuthContext = {
+  auth: Awaited<ReturnType<typeof requireAuthContext>>;
+  supabase: NonNullable<ReturnType<typeof getSupabaseUserServerClient>>;
+};
+
 function formatReviewWeekLabel(value: string) {
   const date = new Date(`${value}T00:00:00`);
   if (Number.isNaN(date.getTime())) {
@@ -297,17 +302,238 @@ const emptySnapshot: DashboardSnapshot = {
   captures: [],
 };
 
-export const getDashboardSnapshot = cache(async (): Promise<DashboardSnapshot> => {
+const emptyDailyFocus = emptySnapshot.dailyFocus;
+const emptyGoals = emptySnapshot.goals;
+const emptyGoalTrophies = emptySnapshot.goalTrophies;
+const emptyHabits = emptySnapshot.habits;
+const emptyReview = emptySnapshot.review;
+const emptyCaptures = emptySnapshot.captures;
+
+async function getSnapshotContext(): Promise<SnapshotAuthContext | null> {
   if (!hasSupabaseEnv()) {
-    return emptySnapshot;
+    return null;
   }
 
   const auth = await requireAuthContext();
   const supabase = getSupabaseUserServerClient(auth.accessToken);
   if (!supabase) {
-    return emptySnapshot;
+    return null;
   }
 
+  return {
+    auth,
+    supabase,
+  };
+}
+
+function buildDailyFocus(tasks: TaskRow[], today: Date) {
+  const focusTasks = tasks.map(
+    (task) =>
+      ({
+        id: task.id,
+        title: task.title,
+        note: task.note,
+        energy: task.energy,
+        done: task.done,
+      }) satisfies FocusTask,
+  );
+
+  return {
+    dateLabel: formatDateLabel(today),
+    completedTasks: focusTasks.filter((task) => task.done).length,
+    topTasks: focusTasks,
+  };
+}
+
+function buildHabitsSnapshot(habitsData: HabitRow[], logsData: HabitLogRow[]) {
+  const summaries = buildHabitSummaries(habitsData, logsData);
+  const heatmap = buildHeatmap(logsData);
+  const completionRate =
+    summaries.length === 0
+      ? 0
+      : Math.round(
+          (summaries.reduce((total, habit) => total + habit.completedThisWeek, 0) /
+            summaries.reduce((total, habit) => total + habit.targetFrequency, 0)) *
+            100,
+        );
+
+  return {
+    completionRate,
+    summaries,
+    heatmap,
+  } satisfies DashboardSnapshot["habits"];
+}
+
+function buildCaptureItems(capturesData: CaptureRow[]) {
+  return capturesData.map((capture) => ({
+    id: capture.id,
+    body: capture.body,
+    createdAt: capture.created_at,
+  })) satisfies CaptureItem[];
+}
+
+function buildReviewSummary(
+  reviewHistory: WeeklyReviewRow[],
+  focusTasks: FocusTask[],
+  goals: Goal[],
+  captures: CaptureItem[],
+  habits: HabitSummary[],
+) {
+  const latestReview = reviewHistory[0] ?? null;
+  const parsedReviewHistory = reviewHistory.map((entry) => {
+    const parsed = parseStoredReviewSummary(entry.summary);
+
+    return {
+      id: entry.id,
+      weekOf: formatReviewWeekLabel(entry.week_of),
+      prompt: entry.prompt,
+      summary: parsed.cleanSummary,
+      score: parsed.meta?.score ?? null,
+      weeklyNote: parsed.meta?.weeklyNote ?? null,
+      trend: parsed.meta?.trend ?? null,
+      momentum: parsed.meta?.momentum ?? null,
+      friction: parsed.meta?.friction ?? null,
+      nextChange: parsed.meta?.nextChange ?? null,
+    };
+  });
+  const latestParsedReview = parsedReviewHistory[0] ?? null;
+
+  return {
+    readiness: latestReview ? "Latest review saved" : "No review saved yet",
+    prompt: latestReview?.prompt || REVIEW_PROMPT,
+    highlights: buildReviewHighlights(focusTasks, goals, captures, habits),
+    latestSummary: latestParsedReview?.summary ?? null,
+    latestInsight:
+      latestParsedReview &&
+      latestParsedReview.momentum &&
+      latestParsedReview.friction &&
+      latestParsedReview.nextChange &&
+      latestParsedReview.score !== null &&
+      latestParsedReview.weeklyNote &&
+      latestParsedReview.trend
+        ? {
+            momentum: latestParsedReview.momentum,
+            friction: latestParsedReview.friction,
+            nextChange: latestParsedReview.nextChange,
+            score: latestParsedReview.score,
+            weeklyNote: latestParsedReview.weeklyNote,
+            trend: latestParsedReview.trend,
+          }
+        : null,
+    histogram: parsedReviewHistory
+      .filter((entry) => entry.score !== null && entry.weeklyNote && entry.trend)
+      .slice()
+      .reverse()
+      .map((entry) => ({
+        weekOf: entry.weekOf,
+        score: entry.score as number,
+        weeklyNote: entry.weeklyNote as string,
+        trend: entry.trend as "improved" | "steady" | "slipped",
+      })),
+    history: parsedReviewHistory.map((entry) => ({
+      id: entry.id,
+      weekOf: entry.weekOf,
+      prompt: entry.prompt,
+      summary: entry.summary,
+      score: entry.score,
+      weeklyNote: entry.weeklyNote,
+      trend: entry.trend,
+    })),
+  } satisfies DashboardSnapshot["review"];
+}
+
+export const getGoalsSnapshot = cache(async () => {
+  const context = await getSnapshotContext();
+  if (!context) {
+    return {
+      goals: emptyGoals,
+      goalTrophies: emptyGoalTrophies,
+    };
+  }
+
+  const { supabase } = context;
+  const [goalsResult, milestonesResult] = await Promise.all([
+    supabase.from("goals").select("id,title,owner_note,deadline,progress,updated_at").order("created_at", {
+      ascending: true,
+    }),
+    supabase.from("milestones").select("id,goal_id,name,status,sort_order").order("sort_order", {
+      ascending: true,
+    }),
+  ]);
+
+  const goals = buildGoals((goalsResult.data ?? []) as GoalRow[], (milestonesResult.data ?? []) as MilestoneRow[]);
+
+  return {
+    goals,
+    goalTrophies: buildGoalTrophies(goals),
+  };
+});
+
+export const getHabitsSnapshot = cache(async () => {
+  const context = await getSnapshotContext();
+  if (!context) {
+    return {
+      habits: emptyHabits,
+    };
+  }
+
+  const { supabase } = context;
+  const today = new Date();
+  const habitWindowStart = new Date(today);
+  habitWindowStart.setDate(habitWindowStart.getDate() - 34);
+  const habitWindowStartIso = toIsoDate(habitWindowStart);
+
+  const [habitsResult, habitLogsResult] = await Promise.all([
+    supabase.from("habits").select("id,name,target_frequency").order("name", {
+      ascending: true,
+    }),
+    supabase
+      .from("habit_logs")
+      .select("habit_id,completed_on,completed")
+      .gte("completed_on", habitWindowStartIso)
+      .order("completed_on", { ascending: true }),
+  ]);
+
+  return {
+    habits: buildHabitsSnapshot(
+      (habitsResult.data ?? []) as HabitRow[],
+      (habitLogsResult.data ?? []) as HabitLogRow[],
+    ),
+  };
+});
+
+export const getCaptureSnapshot = cache(async () => {
+  const context = await getSnapshotContext();
+  if (!context) {
+    return {
+      captures: emptyCaptures,
+    };
+  }
+
+  const { supabase } = context;
+  const capturesResult = await supabase
+    .from("captures")
+    .select("id,body,created_at")
+    .eq("archived", false)
+    .order("created_at", { ascending: false })
+    .limit(5);
+
+  return {
+    captures: buildCaptureItems((capturesResult.data ?? []) as CaptureRow[]),
+  };
+});
+
+export const getReviewSnapshot = cache(async () => {
+  const context = await getSnapshotContext();
+  if (!context) {
+    return {
+      goals: emptyGoals,
+      habits: emptyHabits,
+      review: emptyReview,
+    };
+  }
+
+  const { supabase } = context;
   const today = new Date();
   const todayIso = toIsoDate(today);
   const habitWindowStart = new Date(today);
@@ -355,56 +581,178 @@ export const getDashboardSnapshot = cache(async (): Promise<DashboardSnapshot> =
       .order("week_of", { ascending: false }),
   ]);
 
-  const tasks = (tasksResult.data ?? []) as TaskRow[];
   const goals = buildGoals((goalsResult.data ?? []) as GoalRow[], (milestonesResult.data ?? []) as MilestoneRow[]);
-  const goalTrophies = buildGoalTrophies(goals);
-  const habits = buildHabitSummaries(
+  const habitsSnapshot = buildHabitsSnapshot(
     (habitsResult.data ?? []) as HabitRow[],
     (habitLogsResult.data ?? []) as HabitLogRow[],
   );
-  const captures = ((capturesResult.data ?? []) as CaptureRow[]).map((capture) => ({
-    id: capture.id,
-    body: capture.body,
-    createdAt: capture.created_at,
-  }));
-  const heatmap = buildHeatmap((habitLogsResult.data ?? []) as HabitLogRow[]);
-  const completionRate =
-    habits.length === 0
-      ? 0
-      : Math.round(
-          (habits.reduce((total, habit) => total + habit.completedThisWeek, 0) /
-            habits.reduce((total, habit) => total + habit.targetFrequency, 0)) *
-            100,
-        );
-  const focusTasks = tasks.map(
-    (task) =>
-      ({
-        id: task.id,
-        title: task.title,
-        note: task.note,
-        energy: task.energy,
-        done: task.done,
-      }) satisfies FocusTask,
-  );
-  const reviewHistory = (reviewResult.data ?? []) as WeeklyReviewRow[];
-  const latestReview = reviewHistory[0] ?? null;
-  const parsedReviewHistory = reviewHistory.map((entry) => {
-    const parsed = parseStoredReviewSummary(entry.summary);
+  const captures = buildCaptureItems((capturesResult.data ?? []) as CaptureRow[]);
+  const dailyFocus = buildDailyFocus((tasksResult.data ?? []) as TaskRow[], today);
 
+  return {
+    goals,
+    habits: habitsSnapshot,
+    review: buildReviewSummary(
+      (reviewResult.data ?? []) as WeeklyReviewRow[],
+      dailyFocus.topTasks,
+      goals,
+      captures,
+      habitsSnapshot.summaries,
+    ),
+  };
+});
+
+export const getReviewInsightSnapshot = cache(async () => {
+  const context = await getSnapshotContext();
+  if (!context) {
     return {
-      id: entry.id,
-      weekOf: formatReviewWeekLabel(entry.week_of),
-      prompt: entry.prompt,
-      summary: parsed.cleanSummary,
-      score: parsed.meta?.score ?? null,
-      weeklyNote: parsed.meta?.weeklyNote ?? null,
-      trend: parsed.meta?.trend ?? null,
-      momentum: parsed.meta?.momentum ?? null,
-      friction: parsed.meta?.friction ?? null,
-      nextChange: parsed.meta?.nextChange ?? null,
+      dailyFocus: emptyDailyFocus,
+      goals: emptyGoals,
+      habits: emptyHabits,
+      review: emptyReview,
+      captures: emptyCaptures,
     };
-  });
-  const latestParsedReview = parsedReviewHistory[0] ?? null;
+  }
+
+  const { supabase } = context;
+  const today = new Date();
+  const todayIso = toIsoDate(today);
+  const habitWindowStart = new Date(today);
+  habitWindowStart.setDate(habitWindowStart.getDate() - 34);
+  const habitWindowStartIso = toIsoDate(habitWindowStart);
+
+  const [
+    tasksResult,
+    goalsResult,
+    milestonesResult,
+    habitsResult,
+    habitLogsResult,
+    capturesResult,
+    reviewResult,
+  ] = await Promise.all([
+    supabase
+      .from("tasks")
+      .select("id,title,note,energy,done,task_date")
+      .eq("task_date", todayIso)
+      .order("focus_order", { ascending: true })
+      .limit(3),
+    supabase.from("goals").select("id,title,owner_note,deadline,progress,updated_at").order("created_at", {
+      ascending: true,
+    }),
+    supabase.from("milestones").select("id,goal_id,name,status,sort_order").order("sort_order", {
+      ascending: true,
+    }),
+    supabase.from("habits").select("id,name,target_frequency").order("name", {
+      ascending: true,
+    }),
+    supabase
+      .from("habit_logs")
+      .select("habit_id,completed_on,completed")
+      .gte("completed_on", habitWindowStartIso)
+      .order("completed_on", { ascending: true }),
+    supabase
+      .from("captures")
+      .select("id,body,created_at")
+      .eq("archived", false)
+      .order("created_at", { ascending: false })
+      .limit(5),
+    supabase
+      .from("weekly_reviews")
+      .select("id,week_of,summary,prompt")
+      .order("week_of", { ascending: false }),
+  ]);
+
+  const dailyFocus = buildDailyFocus((tasksResult.data ?? []) as TaskRow[], today);
+  const goals = buildGoals((goalsResult.data ?? []) as GoalRow[], (milestonesResult.data ?? []) as MilestoneRow[]);
+  const habits = buildHabitsSnapshot(
+    (habitsResult.data ?? []) as HabitRow[],
+    (habitLogsResult.data ?? []) as HabitLogRow[],
+  );
+  const captures = buildCaptureItems((capturesResult.data ?? []) as CaptureRow[]);
+
+  return {
+    dailyFocus,
+    goals,
+    habits,
+    captures,
+    review: buildReviewSummary(
+      (reviewResult.data ?? []) as WeeklyReviewRow[],
+      dailyFocus.topTasks,
+      goals,
+      captures,
+      habits.summaries,
+    ),
+  };
+});
+
+export const getHomeSnapshot = cache(async () => {
+  const context = await getSnapshotContext();
+  if (!context) {
+    return {
+      isConfigured: false,
+      user: null,
+      dailyFocus: emptyDailyFocus,
+      habits: emptyHabits,
+      review: emptyReview,
+      captures: emptyCaptures,
+    };
+  }
+
+  const { auth, supabase } = context;
+  const today = new Date();
+  const todayIso = toIsoDate(today);
+  const habitWindowStart = new Date(today);
+  habitWindowStart.setDate(habitWindowStart.getDate() - 34);
+  const habitWindowStartIso = toIsoDate(habitWindowStart);
+
+  const [
+    tasksResult,
+    goalsResult,
+    milestonesResult,
+    habitsResult,
+    habitLogsResult,
+    capturesResult,
+    reviewResult,
+  ] = await Promise.all([
+    supabase
+      .from("tasks")
+      .select("id,title,note,energy,done,task_date")
+      .eq("task_date", todayIso)
+      .order("focus_order", { ascending: true })
+      .limit(3),
+    supabase.from("goals").select("id,title,owner_note,deadline,progress,updated_at").order("created_at", {
+      ascending: true,
+    }),
+    supabase.from("milestones").select("id,goal_id,name,status,sort_order").order("sort_order", {
+      ascending: true,
+    }),
+    supabase.from("habits").select("id,name,target_frequency").order("name", {
+      ascending: true,
+    }),
+    supabase
+      .from("habit_logs")
+      .select("habit_id,completed_on,completed")
+      .gte("completed_on", habitWindowStartIso)
+      .order("completed_on", { ascending: true }),
+    supabase
+      .from("captures")
+      .select("id,body,created_at")
+      .eq("archived", false)
+      .order("created_at", { ascending: false })
+      .limit(5),
+    supabase
+      .from("weekly_reviews")
+      .select("id,week_of,summary,prompt")
+      .order("week_of", { ascending: false }),
+  ]);
+
+  const dailyFocus = buildDailyFocus((tasksResult.data ?? []) as TaskRow[], today);
+  const goals = buildGoals((goalsResult.data ?? []) as GoalRow[], (milestonesResult.data ?? []) as MilestoneRow[]);
+  const habits = buildHabitsSnapshot(
+    (habitsResult.data ?? []) as HabitRow[],
+    (habitLogsResult.data ?? []) as HabitLogRow[],
+  );
+  const captures = buildCaptureItems((capturesResult.data ?? []) as CaptureRow[]);
 
   return {
     isConfigured: true,
@@ -412,63 +760,20 @@ export const getDashboardSnapshot = cache(async (): Promise<DashboardSnapshot> =
       id: auth.user.id,
       email: auth.user.email ?? "Account",
     },
-    dailyFocus: {
-      dateLabel: formatDateLabel(today),
-      completedTasks: focusTasks.filter((task) => task.done).length,
-      topTasks: focusTasks,
-    },
-    goals,
-    goalTrophies,
-    habits: {
-      completionRate,
-      summaries: habits,
-      heatmap,
-    },
-    review: {
-      readiness: latestReview ? "Latest review saved" : "No review saved yet",
-      prompt: latestReview?.prompt || REVIEW_PROMPT,
-      highlights: buildReviewHighlights(focusTasks, goals, captures, habits),
-      latestSummary: latestParsedReview?.summary ?? null,
-      latestInsight:
-        latestParsedReview &&
-        latestParsedReview.momentum &&
-        latestParsedReview.friction &&
-        latestParsedReview.nextChange &&
-        latestParsedReview.score !== null &&
-        latestParsedReview.weeklyNote &&
-        latestParsedReview.trend
-          ? {
-              momentum: latestParsedReview.momentum,
-              friction: latestParsedReview.friction,
-              nextChange: latestParsedReview.nextChange,
-              score: latestParsedReview.score,
-              weeklyNote: latestParsedReview.weeklyNote,
-              trend: latestParsedReview.trend,
-            }
-          : null,
-      histogram: parsedReviewHistory
-        .filter((entry) => entry.score !== null && entry.weeklyNote && entry.trend)
-        .slice()
-        .reverse()
-        .map((entry) => ({
-          weekOf: entry.weekOf,
-          score: entry.score as number,
-          weeklyNote: entry.weeklyNote as string,
-          trend: entry.trend as "improved" | "steady" | "slipped",
-        })),
-      history: parsedReviewHistory.map((entry) => ({
-        id: entry.id,
-        weekOf: entry.weekOf,
-        prompt: entry.prompt,
-        summary: entry.summary,
-        score: entry.score,
-        weeklyNote: entry.weeklyNote,
-        trend: entry.trend,
-      })),
-    },
+    dailyFocus,
+    habits,
+    review: buildReviewSummary(
+      (reviewResult.data ?? []) as WeeklyReviewRow[],
+      dailyFocus.topTasks,
+      goals,
+      captures,
+      habits.summaries,
+    ),
     captures,
   };
 });
+
+export const getDashboardSnapshot = getHomeSnapshot as () => Promise<DashboardSnapshot>;
 
 export function getReviewPrompt() {
   return REVIEW_PROMPT;

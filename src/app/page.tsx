@@ -3,11 +3,11 @@ import { AppShell } from "@/components/app-shell";
 import { Heatmap } from "@/components/heatmap";
 import { QuickCaptureForm } from "@/components/quick-capture-form";
 import { TaskForm } from "@/components/task-form";
-import { getDashboardSnapshot } from "@/lib/data";
+import { getHomeSnapshot } from "@/lib/data";
 
 export default async function Home() {
   await connection();
-  const snapshot = await getDashboardSnapshot();
+  const snapshot = await getHomeSnapshot();
   const completion = Math.round(
     snapshot.dailyFocus.topTasks.length === 0
       ? 0

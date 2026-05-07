@@ -1,4 +1,4 @@
-import { getDashboardSnapshot } from "@/lib/data";
+import { getReviewInsightSnapshot } from "@/lib/data";
 
 export type WeeklyReviewInsight = {
   summary: string;
@@ -16,7 +16,7 @@ function clampScore(value: number) {
   return Math.max(0, Math.min(100, Math.round(value)));
 }
 
-function getFallbackScore(snapshot: Awaited<ReturnType<typeof getDashboardSnapshot>>) {
+function getFallbackScore(snapshot: Awaited<ReturnType<typeof getReviewInsightSnapshot>>) {
   const habitScore = snapshot.habits.completionRate;
   const goalScore =
     snapshot.goals.length === 0
@@ -102,7 +102,7 @@ export function parseStoredReviewSummary(summary: string) {
 }
 
 function buildFallbackReviewInsight(
-  snapshot: Awaited<ReturnType<typeof getDashboardSnapshot>>,
+  snapshot: Awaited<ReturnType<typeof getReviewInsightSnapshot>>,
 ): WeeklyReviewInsight {
   const activeGoal = snapshot.goals[0];
   const latestGoalLine = activeGoal
@@ -173,7 +173,7 @@ function parseStructuredInsight(raw: string): WeeklyReviewInsight | null {
 }
 
 export async function buildWeeklyReviewInsight(): Promise<WeeklyReviewInsight> {
-  const snapshot = await getDashboardSnapshot();
+  const snapshot = await getReviewInsightSnapshot();
   const fallbackInsight = buildFallbackReviewInsight(snapshot);
   const groqApiKey = process.env.GROQ_API_KEY;
 

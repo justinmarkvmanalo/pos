@@ -7,12 +7,12 @@ import { MilestoneDeleteForm } from "@/components/milestone-delete-form";
 import { MilestoneForm } from "@/components/milestone-form";
 import { MilestoneStatusForm } from "@/components/milestone-status-form";
 import { TrophyCard } from "@/components/trophy-card";
-import { getDashboardSnapshot } from "@/lib/data";
+import { getGoalsSnapshot } from "@/lib/data";
 import { groupGoalExamples } from "@/lib/goal-examples";
 
 export default async function GoalsPage() {
   await connection();
-  const { goals, goalTrophies } = await getDashboardSnapshot();
+  const { goals, goalTrophies } = await getGoalsSnapshot();
   const goalExampleGroups = groupGoalExamples();
   const todayIso = new Date().toISOString().slice(0, 10);
 
