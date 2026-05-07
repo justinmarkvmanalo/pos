@@ -16,12 +16,12 @@ export default async function Home() {
 
   return (
     <AppShell>
-      <section className="fade-up grid items-start gap-6 xl:grid-cols-[1.4fr_0.9fr]">
+      <section className="fade-up grid items-start gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.95fr)]">
         <div className="panel-raised rounded-[2rem] p-6 sm:p-8">
           <p className="text-sm uppercase tracking-[0.3em] text-ink-soft">
             Personal command center
           </p>
-          <div className="mt-4 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="mt-4 grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(220px,0.8fr)] xl:items-end">
             <div className="max-w-2xl">
               <h1 className="display text-4xl leading-tight sm:text-5xl">
                 Start with the work that compounds.
@@ -30,13 +30,25 @@ export default async function Home() {
                 Focus on today, keep your habits moving, and review the week before it drifts.
               </p>
             </div>
-            <div className="glow-pulse rounded-[1.5rem] bg-[linear-gradient(145deg,#201914_0%,#3b2d25_100%)] px-5 py-4 text-[#fff7ef]">
+            <div className="glow-pulse rounded-[1.5rem] bg-[linear-gradient(145deg,#201914_0%,#3b2d25_100%)] px-5 py-4 text-[#fff7ef] xl:self-stretch">
               <p className="text-xs uppercase tracking-[0.2em] text-[#d7c6b8]">System note</p>
-              <p className="mt-2 max-w-52 text-sm leading-6">Add only what matters. The dashboard stays sparse on purpose.</p>
+              <p className="mt-2 max-w-52 text-sm leading-6">
+                Add only what matters. The dashboard stays sparse on purpose.
+              </p>
+              <div className="mt-5 grid gap-3 text-sm text-[#f5e4d6]">
+                <div className="rounded-[1rem] border border-white/10 bg-white/6 px-3 py-3">
+                  <p className="text-[11px] uppercase tracking-[0.18em] text-[#d7c6b8]">Focus</p>
+                  <p className="mt-1 font-medium">{snapshot.dailyFocus.topTasks.length} tasks loaded</p>
+                </div>
+                <div className="rounded-[1rem] border border-white/10 bg-white/6 px-3 py-3">
+                  <p className="text-[11px] uppercase tracking-[0.18em] text-[#d7c6b8]">Review</p>
+                  <p className="mt-1 font-medium">{snapshot.review.readiness}</p>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="metric-grid mt-8">
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             <div className="soft-enter rounded-[1.5rem] bg-[rgba(255,251,245,0.88)] p-5">
               <p className="text-sm text-ink-soft">Task completion</p>
               <p className="mt-2 text-3xl font-semibold">{completion}%</p>
@@ -73,6 +85,16 @@ export default async function Home() {
             </div>
           </div>
           <p className="mt-4 text-sm leading-6 text-ink-soft">{snapshot.review.prompt}</p>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+            <div className="rounded-[1.25rem] border border-border bg-[rgba(255,251,245,0.88)] px-4 py-4">
+              <p className="text-[11px] uppercase tracking-[0.18em] text-ink-soft">Highlights</p>
+              <p className="mt-2 text-2xl font-semibold">{snapshot.review.highlights.length}</p>
+            </div>
+            <div className="rounded-[1.25rem] border border-border bg-[rgba(255,251,245,0.88)] px-4 py-4">
+              <p className="text-[11px] uppercase tracking-[0.18em] text-ink-soft">Inbox</p>
+              <p className="mt-2 text-2xl font-semibold">{snapshot.captures.length}</p>
+            </div>
+          </div>
           <div className="mt-6 space-y-3">
             {snapshot.review.highlights.map((highlight) => (
               <div
@@ -91,7 +113,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="grid items-start gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+      <section className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.95fr)]">
         <div data-tour="daily-focus" className="panel-raised rounded-[2rem] p-6 sm:p-8">
           <div className="flex items-center justify-between">
             <div>
@@ -137,7 +159,7 @@ export default async function Home() {
           </div>
         </div>
 
-        <div className="grid gap-6">
+        <div className="grid gap-6 xl:content-start">
           <div data-tour="habit-map" className="panel-raised rounded-[2rem] p-6">
             <div className="flex items-center justify-between">
               <div>
