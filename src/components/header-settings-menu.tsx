@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { logoutAction } from "@/app/actions/auth";
 import { NavIcon } from "@/components/nav-icon";
@@ -17,8 +16,6 @@ export function HeaderSettingsMenu({
   avatarUrl: string;
   compact?: boolean;
 }) {
-  const pathname = usePathname();
-  const router = useRouter();
   const rootRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const initials = (userName || userEmail || "A").slice(0, 1).toUpperCase();
@@ -52,10 +49,6 @@ export function HeaderSettingsMenu({
   function openGuide() {
     setIsOpen(false);
     window.dispatchEvent(new CustomEvent("winos:open-guide"));
-
-    const url = new URL(window.location.href);
-    url.searchParams.set("guide", "1");
-    router.push(`${pathname}?${url.searchParams.toString()}`);
   }
 
   return (
