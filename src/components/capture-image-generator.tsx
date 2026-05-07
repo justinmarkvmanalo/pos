@@ -6,10 +6,14 @@ import { useId, useState, type FormEvent } from "react";
 declare global {
   interface Window {
     puter?: {
+      auth?: {
+        isSignedIn: () => boolean;
+        signIn: (options?: Record<string, unknown>) => Promise<unknown>;
+      };
       ai?: {
         txt2img: (
           prompt: string,
-          options?: Record<string, unknown>,
+          options?: boolean | Record<string, unknown>,
         ) => Promise<HTMLImageElement | string>;
       };
     };
@@ -23,6 +27,36 @@ function getErrorMessage(error: unknown) {
     return error.message;
   }
 
+  if (typeof error === "string" && error) {
+    return error;
+  }
+
+  if (error && typeof error === "object") {
+    const candidate = error as {
+      message?: unknown;
+      error?: unknown;
+      code?: unknown;
+      status?: unknown;
+    };
+    const message =
+      typeof candidate.message === "string"
+        ? candidate.message
+        : typeof candidate.error === "string"
+          ? candidate.error
+          : null;
+
+    if (message) {
+      const details = [candidate.status, candidate.code].filter(Boolean).join(" / ");
+      return details ? `${message} (${details})` : message;
+    }
+
+    try {
+      return JSON.stringify(error);
+    } catch {
+      return "Image generation failed. Check your Puter session and try again.";
+    }
+  }
+
   return "Image generation failed. Check your Puter session and try again.";
 }
 
@@ -30,9 +64,37 @@ export function CaptureImageGenerator() {
   const promptId = useId();
   const [prompt, setPrompt] = useState("");
   const [scriptReady, setScriptReady] = useState(false);
+  const [isSignedIn, setIsSignedIn] = useState(false);
+  const [useTestMode, setUseTestMode] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isSigningIn, setIsSigningIn] = useState(false);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
+
+  function refreshSignInState() {
+    setIsSignedIn(Boolean(window.puter?.auth?.isSignedIn?.()));
+  }
+
+  async function handleSignIn() {
+    if (!window.puter?.auth?.signIn) {
+      setErrorMessage("Puter auth is not ready yet.");
+      return;
+    }
+
+    setIsSigningIn(true);
+    setErrorMessage("");
+
+    try {
+      await window.puter.auth.signIn({
+        attempt_temp_user_creation: true,
+      });
+      refreshSignInState();
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error));
+    } finally {
+      setIsSigningIn(false);
+    }
+  }
 
   async function handleGenerate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -52,7 +114,9 @@ export function CaptureImageGenerator() {
     setErrorMessage("");
 
     try {
-      const result = await window.puter.ai.txt2img(trimmedPrompt);
+      const result = await window.puter.ai.txt2img(trimmedPrompt, {
+        test_mode: useTestMode,
+      });
       const nextImageSrc = typeof result === "string" ? result : result.src;
 
       if (!nextImageSrc) {
@@ -60,6 +124,7 @@ export function CaptureImageGenerator() {
       }
 
       setImageSrc(nextImageSrc);
+      refreshSignInState();
     } catch (error) {
       setErrorMessage(getErrorMessage(error));
     } finally {
@@ -72,7 +137,10 @@ export function CaptureImageGenerator() {
       <Script
         src={SCRIPT_SRC}
         strategy="afterInteractive"
-        onLoad={() => setScriptReady(true)}
+        onLoad={() => {
+          setScriptReady(true);
+          refreshSignInState();
+        }}
         onError={() => setErrorMessage("Could not load Puter.js. Check your connection and try again.")}
       />
 
@@ -91,6 +159,20 @@ export function CaptureImageGenerator() {
         user to sign in because image costs are handled through the user&apos;s Puter account.
       </p>
 
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <div className="rounded-full border border-border bg-white/70 px-3 py-1 text-xs uppercase tracking-[0.16em] text-ink-soft">
+          {isSignedIn ? "Signed in to Puter" : "Not signed in to Puter"}
+        </div>
+        <button
+          type="button"
+          onClick={handleSignIn}
+          disabled={!scriptReady || isSigningIn}
+          className="rounded-full border border-border bg-surface-strong px-4 py-2 text-sm font-medium text-ink-soft transition hover:border-accent hover:text-accent-strong disabled:opacity-60"
+        >
+          {isSigningIn ? "Signing in..." : "Sign in to Puter"}
+        </button>
+      </div>
+
       <form onSubmit={handleGenerate} className="mt-5 grid gap-4 lg:grid-cols-[1fr_0.92fr]">
         <div className="rounded-[1.5rem] border border-border bg-surface-strong p-4">
           <label htmlFor={promptId} className="text-sm font-semibold text-foreground">
@@ -104,6 +186,15 @@ export function CaptureImageGenerator() {
             placeholder="Example: warm corner coffee kiosk with brass details, soft morning light, product mockup style"
             className="mt-3 min-h-36 w-full rounded-[1.25rem] border border-border bg-white/70 px-4 py-3 text-sm outline-none transition placeholder:text-ink-soft focus:border-accent"
           />
+          <label className="mt-4 flex items-center gap-3 text-sm text-ink-soft">
+            <input
+              type="checkbox"
+              checked={useTestMode}
+              onChange={(event) => setUseTestMode(event.target.checked)}
+              className="h-4 w-4 rounded border-border accent-accent"
+            />
+            Use Puter test mode first
+          </label>
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <button
               type="submit"
@@ -125,6 +216,10 @@ export function CaptureImageGenerator() {
             </button>
           </div>
           <p className="mt-3 min-h-5 text-sm text-[#8f2f23]">{errorMessage}</p>
+          <p className="text-xs leading-6 text-ink-soft">
+            If test mode works but normal mode fails, the issue is likely Puter account auth,
+            credits, or provider-side validation rather than this UI.
+          </p>
         </div>
 
         <div className="capture-image-stage rounded-[1.5rem] border border-border bg-[rgba(32,25,20,0.04)] p-4">
