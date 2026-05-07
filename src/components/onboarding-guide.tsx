@@ -154,32 +154,32 @@ export function OnboardingGuide() {
       {rect ? (
         <>
           <div
-            className="absolute left-0 top-0 right-0 bg-[rgba(32,25,20,0.46)] backdrop-blur-[3px]"
+            className="absolute left-0 top-0 right-0 bg-[rgba(32,25,20,0.52)]"
             style={{ height: Math.max(0, rect.top - 10) }}
           />
           <div
-            className="absolute left-0 right-0 bottom-0 bg-[rgba(32,25,20,0.46)] backdrop-blur-[3px]"
+            className="absolute left-0 right-0 bottom-0 bg-[rgba(32,25,20,0.52)]"
             style={{ top: rect.bottom + 10 }}
           />
           <div
-            className="absolute left-0 bg-[rgba(32,25,20,0.46)] backdrop-blur-[3px]"
+            className="absolute left-0 bg-[rgba(32,25,20,0.52)]"
             style={{
-              top: rect.top + 22,
+              top: rect.top - 10,
               width: Math.max(0, rect.left - 10),
-              height: Math.max(0, rect.height - 24),
+              height: rect.height + 20,
             }}
           />
           <div
-            className="absolute right-0 bg-[rgba(32,25,20,0.46)] backdrop-blur-[3px]"
+            className="absolute right-0 bg-[rgba(32,25,20,0.52)]"
             style={{
-              top: rect.top + 22,
+              top: rect.top - 10,
               width: Math.max(0, window.innerWidth - rect.right - 10),
-              height: Math.max(0, rect.height - 24),
+              height: rect.height + 20,
             }}
           />
 
           <div
-            className="absolute bg-[radial-gradient(circle_at_bottom_right,transparent_31px,rgba(32,25,20,0.46)_32px)] backdrop-blur-[3px]"
+            className="absolute bg-[radial-gradient(circle_at_bottom_right,transparent_31px,rgba(32,25,20,0.52)_32px)]"
             style={{
               left: Math.max(0, rect.left - 10),
               top: Math.max(0, rect.top - 10),
@@ -188,7 +188,7 @@ export function OnboardingGuide() {
             }}
           />
           <div
-            className="absolute bg-[radial-gradient(circle_at_bottom_left,transparent_31px,rgba(32,25,20,0.46)_32px)] backdrop-blur-[3px]"
+            className="absolute bg-[radial-gradient(circle_at_bottom_left,transparent_31px,rgba(32,25,20,0.52)_32px)]"
             style={{
               left: rect.right - 32,
               top: Math.max(0, rect.top - 10),
@@ -197,7 +197,7 @@ export function OnboardingGuide() {
             }}
           />
           <div
-            className="absolute bg-[radial-gradient(circle_at_top_right,transparent_31px,rgba(32,25,20,0.46)_32px)] backdrop-blur-[3px]"
+            className="absolute bg-[radial-gradient(circle_at_top_right,transparent_31px,rgba(32,25,20,0.52)_32px)]"
             style={{
               left: Math.max(0, rect.left - 10),
               top: rect.bottom - 32,
@@ -206,7 +206,7 @@ export function OnboardingGuide() {
             }}
           />
           <div
-            className="absolute bg-[radial-gradient(circle_at_top_left,transparent_31px,rgba(32,25,20,0.46)_32px)] backdrop-blur-[3px]"
+            className="absolute bg-[radial-gradient(circle_at_top_left,transparent_31px,rgba(32,25,20,0.52)_32px)]"
             style={{
               left: rect.right - 32,
               top: rect.bottom - 32,
@@ -216,12 +216,12 @@ export function OnboardingGuide() {
           />
         </>
       ) : (
-        <div className="absolute inset-0 bg-[rgba(32,25,20,0.46)] backdrop-blur-[3px]" />
+        <div className="absolute inset-0 bg-[rgba(32,25,20,0.52)]" />
       )}
 
       {rect ? (
         <div
-          className="absolute rounded-[2rem] border border-white/85 shadow-[0_0_0_10px_rgba(255,247,239,0.08),0_22px_48px_rgba(32,25,20,0.18)] transition-all duration-300"
+          className="absolute rounded-[2rem] border border-white/90 bg-transparent shadow-[0_0_0_10px_rgba(255,247,239,0.08),0_22px_48px_rgba(32,25,20,0.18)] transition-all duration-300"
           style={{
             left: rect.left - 10,
             top: rect.top - 10,
