@@ -1,12 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { ActionState } from "@/lib/form-state";
 
 export function ActionToast({ state }: { state: ActionState }) {
   const [dismissedToken, setDismissedToken] = useState<number | null>(null);
   const isOpen =
     state.status === "success" && Boolean(state.message) && state.token !== dismissedToken;
+
+  useEffect(() => {
+    if (!isOpen || !state.token) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setDismissedToken(state.token);
+    }, 2000);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [isOpen, state.token]);
 
   if (!isOpen || !state.message) {
     return null;
