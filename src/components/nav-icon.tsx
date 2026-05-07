@@ -2,7 +2,7 @@ export function NavIcon({
   icon,
   className = "h-5 w-5",
 }: {
-  icon: "dashboard" | "goals" | "habits" | "capture" | "review" | "profile" | "logout";
+  icon: "dashboard" | "goals" | "habits" | "capture" | "review" | "profile" | "logout" | "settings" | "spark";
   className?: string;
 }) {
   const sharedProps = {
@@ -68,6 +68,19 @@ export function NavIcon({
           <path d="M10 17l5-5-5-5" />
           <path d="M15 12H4" />
           <path d="M20 20V4" />
+        </svg>
+      );
+    case "settings":
+      return (
+        <svg {...sharedProps}>
+          <circle cx="12" cy="12" r="3.2" />
+          <path d="M19.4 15a1 1 0 0 0 .2 1.1l.1.1a2 2 0 0 1-2.8 2.8l-.1-.1a1 1 0 0 0-1.1-.2 1 1 0 0 0-.6.9V20a2 2 0 0 1-4 0v-.2a1 1 0 0 0-.6-.9 1 1 0 0 0-1.1.2l-.1.1a2 2 0 0 1-2.8-2.8l.1-.1a1 1 0 0 0 .2-1.1 1 1 0 0 0-.9-.6H4a2 2 0 0 1 0-4h.2a1 1 0 0 0 .9-.6 1 1 0 0 0-.2-1.1l-.1-.1a2 2 0 0 1 2.8-2.8l.1.1a1 1 0 0 0 1.1.2 1 1 0 0 0 .6-.9V4a2 2 0 0 1 4 0v.2a1 1 0 0 0 .6.9 1 1 0 0 0 1.1-.2l.1-.1a2 2 0 0 1 2.8 2.8l-.1.1a1 1 0 0 0-.2 1.1 1 1 0 0 0 .9.6h.2a2 2 0 0 1 0 4h-.2a1 1 0 0 0-.9.6Z" />
+        </svg>
+      );
+    case "spark":
+      return (
+        <svg {...sharedProps}>
+          <path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Z" />
         </svg>
       );
   }

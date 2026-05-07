@@ -15,8 +15,7 @@ export function QuickCaptureForm({ captures }: { captures: CaptureItem[] }) {
       <RevealForm buttonLabel="Add to inbox" title="New inbox item">
         <form action={formAction} className="flex flex-col gap-3">
           <p className="rounded-[1rem] border border-dashed border-border bg-surface-strong px-4 py-3 text-sm leading-6 text-ink-soft">
-            Put anything here that you do not want to forget yet: a task, idea, reminder, link, or
-            rough note. This is temporary inbox space, not a finished list.
+            Drop a task, reminder, link, or rough note here.
           </p>
           <textarea
             name="body"

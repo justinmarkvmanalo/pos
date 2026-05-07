@@ -22,8 +22,7 @@ export default async function GoalsPage() {
         <p className="text-sm uppercase tracking-[0.2em] text-ink-soft">Goal tracker</p>
         <h1 className="display mt-2 text-4xl">Milestones with deadline pressure</h1>
         <p className="mt-4 max-w-3xl text-base leading-7 text-ink-soft">
-          Goals stay concrete here: write the outcome once, break it into milestones, and let the
-          app calculate progress from what is actually finished.
+          Set the outcome, break it into milestones, and let progress update from what gets done.
         </p>
         <GoalCreateControls goalExampleGroups={goalExampleGroups} />
       </section>
@@ -122,9 +121,7 @@ export default async function GoalsPage() {
         <aside className="panel self-start rounded-[2rem] p-6">
           <p className="text-sm uppercase tracking-[0.2em] text-ink-soft">Trophy case</p>
           <h2 className="mt-2 text-2xl font-semibold">Finished goals</h2>
-          <p className="mt-3 text-sm leading-6 text-ink-soft">
-            Every goal that reaches full completion earns a trophy here.
-          </p>
+          <p className="mt-3 text-sm leading-6 text-ink-soft">Completed goals land here.</p>
           <div className="mt-5 space-y-3">
             {goalTrophies.length === 0 ? (
               <div className="rounded-[1.5rem] border border-dashed border-border bg-surface-strong px-4 py-4 text-sm text-ink-soft">

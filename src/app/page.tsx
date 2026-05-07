@@ -27,15 +27,12 @@ export default async function Home() {
                 Start with the work that compounds.
               </h1>
               <p className="mt-4 max-w-xl text-base leading-7 text-ink-soft sm:text-lg">
-                Your day is pre-trimmed to the three tasks that matter, the habits that
-                keep momentum alive, and the review loop that stops weeks from drifting.
+                Focus on today, keep your habits moving, and review the week before it drifts.
               </p>
             </div>
             <div className="glow-pulse rounded-[1.5rem] bg-[linear-gradient(145deg,#201914_0%,#3b2d25_100%)] px-5 py-4 text-[#fff7ef]">
               <p className="text-xs uppercase tracking-[0.2em] text-[#d7c6b8]">System note</p>
-              <p className="mt-2 max-w-52 text-sm leading-6">
-                Real data now drives this dashboard. Empty sections stay empty until you add rows.
-              </p>
+              <p className="mt-2 max-w-52 text-sm leading-6">Add only what matters. The dashboard stays sparse on purpose.</p>
             </div>
           </div>
 
@@ -65,7 +62,7 @@ export default async function Home() {
           </div>
         </div>
 
-        <div className="panel-raised fade-up-delay rounded-[2rem] p-6">
+        <div data-tour="review" className="panel-raised fade-up-delay rounded-[2rem] p-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm uppercase tracking-[0.2em] text-ink-soft">Weekly review</p>
@@ -95,7 +92,7 @@ export default async function Home() {
       </section>
 
       <section className="grid items-start gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="panel-raised rounded-[2rem] p-6 sm:p-8">
+        <div data-tour="daily-focus" className="panel-raised rounded-[2rem] p-6 sm:p-8">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm uppercase tracking-[0.2em] text-ink-soft">Daily focus</p>
@@ -141,7 +138,7 @@ export default async function Home() {
         </div>
 
         <div className="grid gap-6">
-          <div className="panel-raised rounded-[2rem] p-6">
+          <div data-tour="habit-map" className="panel-raised rounded-[2rem] p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm uppercase tracking-[0.2em] text-ink-soft">Habit logger</p>
@@ -152,17 +149,14 @@ export default async function Home() {
             <Heatmap entries={snapshot.habits.heatmap} />
           </div>
 
-          <div className="panel-raised rounded-[2rem] p-6">
+          <div data-tour="capture" className="panel-raised rounded-[2rem] p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm uppercase tracking-[0.2em] text-ink-soft">Quick capture</p>
                 <h2 className="display mt-2 text-3xl">Dump first, sort later</h2>
               </div>
             </div>
-            <p className="mt-3 text-sm leading-6 text-ink-soft">
-              Fast capture for links, half-formed tasks, and thoughts you do not want to hold in
-              working memory.
-            </p>
+            <p className="mt-3 text-sm leading-6 text-ink-soft">Store loose tasks, links, and ideas here first.</p>
             <QuickCaptureForm captures={snapshot.captures} />
           </div>
         </div>

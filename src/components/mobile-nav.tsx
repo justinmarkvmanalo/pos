@@ -18,9 +18,9 @@ export function MobileNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-20 px-4 pb-4 md:hidden">
+    <nav data-tour="navigation" className="fixed inset-x-0 bottom-0 z-20 px-4 pb-4 md:hidden">
       <div className="panel no-scrollbar mx-auto flex max-w-xl items-center gap-2 overflow-x-auto rounded-[1.75rem] px-2 py-2">
-        {navigation.map((item) => {
+        {navigation.filter((item) => item.href !== "/profile").map((item) => {
           const isActive = isActivePath(pathname, item.href);
 
           return (

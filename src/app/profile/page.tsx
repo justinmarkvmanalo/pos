@@ -15,7 +15,7 @@ export default async function ProfilePage() {
         <p className="text-sm uppercase tracking-[0.2em] text-ink-soft">Profile</p>
         <h1 className="display mt-2 text-4xl">Personal details</h1>
         <p className="mt-4 max-w-2xl text-base leading-7 text-ink-soft">
-          Update the basic account information shown across your workspace.
+          Update the basic account details shown across your workspace.
         </p>
         <div className="mt-6 grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
           <aside className="panel-raised ai-panel rounded-[1.75rem] p-5">

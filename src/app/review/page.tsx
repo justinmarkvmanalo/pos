@@ -17,7 +17,7 @@ export default async function ReviewPage() {
         <div className="panel rounded-[2rem] p-6 sm:p-8">
           <p className="text-sm uppercase tracking-[0.2em] text-ink-soft">Weekly review</p>
           <h1 className="display mt-2 text-4xl">Reflection with actual operating data</h1>
-          <p className="mt-4 max-w-3xl text-base leading-7 text-ink-soft">{review.prompt}</p>
+          <p className="mt-4 max-w-3xl text-base leading-7 text-ink-soft">Use the week&apos;s real activity to decide what changes next.</p>
           <ReviewGenerateButton />
 
           <div className="mt-6 rounded-[1.5rem] bg-[#201914] p-5 text-[#fff7ef]">

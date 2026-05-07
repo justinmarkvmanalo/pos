@@ -48,7 +48,7 @@ export function GoalCreateControls({ goalExampleGroups }: { goalExampleGroups: G
       <CollapsiblePanel
         buttonLabel="Goal idea library"
         title="Goal idea library"
-        description="This keeps manual goal creation, but also gives you many example goals you can add with one click and customize later with milestones and notes."
+        description="Use an example goal, then adjust the milestones later."
         className="mt-4 rounded-[1.5rem] border border-dashed border-border bg-surface-strong p-4"
         open={isLibraryOpen}
         onOpenChange={setIsLibraryOpen}

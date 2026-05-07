@@ -54,8 +54,7 @@ export default async function HabitsPage() {
           <p className="text-sm uppercase tracking-[0.2em] text-ink-soft">Habit logger</p>
           <h1 className="display mt-2 text-4xl">See consistency, not isolated days</h1>
           <p className="mt-4 max-w-3xl text-base leading-7 text-ink-soft">
-            Each habit has a weekly target, like every day or three times a week. You only need to
-            log the days you did it, and the page shows whether you are on pace.
+            Set a weekly target, log the days you follow through, and watch the pace.
           </p>
           <HabitCreateControls suggestionGroups={suggestionGroups} />
           <Heatmap entries={habits.heatmap} />
@@ -65,10 +64,7 @@ export default async function HabitsPage() {
           <article className="panel rounded-[2rem] p-6">
             <div>
               <p className="text-sm uppercase tracking-[0.16em] text-ink-soft">Habit pulse</p>
-              <p className="mt-2 text-sm leading-6 text-ink-soft">
-                Weekly pace, streak, and today&apos;s log are compressed into a tighter list so
-                large habit sets stay readable.
-              </p>
+              <p className="mt-2 text-sm leading-6 text-ink-soft">See pace, streaks, and today&apos;s log at a glance.</p>
             </div>
 
             <div className="mt-4 grid gap-3 sm:grid-cols-3">

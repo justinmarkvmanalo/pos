@@ -1,10 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { logoutAction } from "@/app/actions/auth";
 import { navigation } from "@/components/app-navigation";
+import { HeaderSettingsMenu } from "@/components/header-settings-menu";
 import { MobileNav } from "@/components/mobile-nav";
-import { NavIcon } from "@/components/nav-icon";
+import { OnboardingGuide } from "@/components/onboarding-guide";
 import { getOptionalUser } from "@/lib/auth";
 
 export async function AppShell({ children }: { children: ReactNode }) {
@@ -31,18 +31,12 @@ export async function AppShell({ children }: { children: ReactNode }) {
             </div>
           </div>
           {user ? (
-            avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={avatarUrl}
-                alt="profile picture"
-                className="h-10 w-10 rounded-2xl border border-border bg-white/80 object-cover"
-              />
-            ) : (
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-white/80 text-sm font-semibold text-ink-soft">
-                {(userName || user.email || "A").slice(0, 1).toUpperCase()}
-              </div>
-            )
+            <HeaderSettingsMenu
+              userName={userName || "Settings"}
+              userEmail={user.email ?? ""}
+              avatarUrl={avatarUrl}
+              compact
+            />
           ) : null}
         </div>
       </div>
@@ -64,9 +58,9 @@ export async function AppShell({ children }: { children: ReactNode }) {
               </div>
             </div>
           </div>
-          <div className="flex flex-col gap-3 lg:items-end">
-            <nav className="hidden flex-wrap gap-2 md:flex">
-              {navigation.map((item) => (
+          <div className="flex items-center gap-3 lg:justify-end">
+            <nav data-tour="navigation" className="hidden flex-wrap gap-2 md:flex">
+              {navigation.filter((item) => item.href !== "/profile").map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
@@ -75,40 +69,19 @@ export async function AppShell({ children }: { children: ReactNode }) {
                   {item.label}
                 </Link>
               ))}
-              {user ? (
-                <form action={logoutAction}>
-                  <button
-                    type="submit"
-                    className="inline-flex items-center gap-2 rounded-full border border-border bg-[rgba(255,251,245,0.88)] px-4 py-2 text-sm font-medium text-ink-soft transition hover:border-accent hover:text-accent-strong"
-                  >
-                    <NavIcon icon="logout" className="h-4 w-4" />
-                    Log out
-                  </button>
-                </form>
-              ) : null}
             </nav>
             {user ? (
-              <div className="flex max-w-full items-center gap-3 text-sm text-ink-soft">
-                {avatarUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={avatarUrl}
-                    alt="profile picture"
-                    className="h-9 w-9 rounded-2xl border border-border bg-white/80 object-cover"
-                  />
-                ) : (
-                  <div className="flex h-9 w-9 items-center justify-center rounded-2xl border border-border bg-white/80 text-xs font-semibold text-ink-soft">
-                    {(userName || user.email || "A").slice(0, 1).toUpperCase()}
-                  </div>
-                )}
-                <span className="max-w-[14rem] truncate font-medium">{userName || "Account"}</span>
-                <span className="max-w-[18rem] truncate">{user.email}</span>
-              </div>
+              <HeaderSettingsMenu
+                userName={userName || "Settings"}
+                userEmail={user.email ?? ""}
+                avatarUrl={avatarUrl}
+              />
             ) : null}
           </div>
         </div>
       </header>
 
+      <OnboardingGuide />
       <main className="flex flex-1 flex-col gap-6 py-6">{children}</main>
       <MobileNav />
     </div>
