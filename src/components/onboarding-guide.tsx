@@ -163,7 +163,7 @@ export function OnboardingGuide() {
     const svg = `
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${viewport.width} ${viewport.height}">
         <rect width="${viewport.width}" height="${viewport.height}" fill="white"/>
-        <rect x="${x}" y="${y}" width="${width}" height="${height}" rx="${radius}" ry="${radius}" fill="black"/>
+        <rect x="${x}" y="${y}" width="${width}" height="${height}" rx="${radius}" ry="${radius}" fill="transparent"/>
       </svg>
     `;
     const maskImage = `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
@@ -171,6 +171,8 @@ export function OnboardingGuide() {
     return {
       WebkitMaskImage: maskImage,
       maskImage,
+      WebkitMaskMode: "alpha",
+      maskMode: "alpha",
       WebkitMaskRepeat: "no-repeat",
       maskRepeat: "no-repeat",
       WebkitMaskSize: "100% 100%",
