@@ -22,6 +22,38 @@ declare global {
 
 const SCRIPT_SRC = "https://js.puter.com/v2/";
 
+function serializeError(error: unknown) {
+  if (error === null || error === undefined) {
+    return String(error);
+  }
+
+  if (typeof error === "string") {
+    return error;
+  }
+
+  if (error instanceof Error) {
+    return JSON.stringify(
+      {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      },
+      null,
+      2,
+    );
+  }
+
+  if (typeof error === "object") {
+    try {
+      return JSON.stringify(error, null, 2);
+    } catch {
+      return Object.prototype.toString.call(error);
+    }
+  }
+
+  return String(error);
+}
+
 function getErrorMessage(error: unknown) {
   if (error instanceof Error && error.message) {
     return error.message;
@@ -70,27 +102,44 @@ export function CaptureImageGenerator() {
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
+  const [diagnosticText, setDiagnosticText] = useState("");
 
   function refreshSignInState() {
     setIsSignedIn(Boolean(window.puter?.auth?.isSignedIn?.()));
   }
 
+  function setDiagnostics(label: string, payload: unknown) {
+    const text = `${label}\n${serializeError(payload)}`;
+    setDiagnosticText(text);
+    console.error(label, payload);
+  }
+
   async function handleSignIn() {
     if (!window.puter?.auth?.signIn) {
       setErrorMessage("Puter auth is not ready yet.");
+      setDiagnostics("Puter auth module missing", {
+        hasPuter: Boolean(window.puter),
+        hasAuth: Boolean(window.puter?.auth),
+      });
       return;
     }
 
     setIsSigningIn(true);
     setErrorMessage("");
+    setDiagnosticText("");
 
     try {
-      await window.puter.auth.signIn({
+      const signInResult = await window.puter.auth.signIn({
         attempt_temp_user_creation: true,
       });
       refreshSignInState();
+      setDiagnostics("Puter sign-in result", {
+        signInResult,
+        isSignedIn: Boolean(window.puter?.auth?.isSignedIn?.()),
+      });
     } catch (error) {
       setErrorMessage(getErrorMessage(error));
+      setDiagnostics("Puter sign-in failed", error);
     } finally {
       setIsSigningIn(false);
     }
@@ -107,13 +156,23 @@ export function CaptureImageGenerator() {
 
     if (!window.puter?.ai?.txt2img) {
       setErrorMessage("Puter.js is still loading. Try again in a moment.");
+      setDiagnostics("Puter image module missing", {
+        hasPuter: Boolean(window.puter),
+        hasAi: Boolean(window.puter?.ai),
+      });
       return;
     }
 
     setIsGenerating(true);
     setErrorMessage("");
+    setDiagnosticText("");
 
     try {
+      console.log("Calling puter.ai.txt2img", {
+        prompt: trimmedPrompt,
+        test_mode: useTestMode,
+        isSignedIn: Boolean(window.puter?.auth?.isSignedIn?.()),
+      });
       const result = await window.puter.ai.txt2img(trimmedPrompt, {
         test_mode: useTestMode,
       });
@@ -125,8 +184,14 @@ export function CaptureImageGenerator() {
 
       setImageSrc(nextImageSrc);
       refreshSignInState();
+      setDiagnostics("Puter image generation result", {
+        resultType: typeof result,
+        imageSrc: nextImageSrc,
+        isSignedIn: Boolean(window.puter?.auth?.isSignedIn?.()),
+      });
     } catch (error) {
       setErrorMessage(getErrorMessage(error));
+      setDiagnostics("Puter image generation failed", error);
     } finally {
       setIsGenerating(false);
     }
@@ -140,8 +205,20 @@ export function CaptureImageGenerator() {
         onLoad={() => {
           setScriptReady(true);
           refreshSignInState();
+          setDiagnostics("Puter script loaded", {
+            hasPuter: Boolean(window.puter),
+            hasAuth: Boolean(window.puter?.auth),
+            hasAi: Boolean(window.puter?.ai),
+            isSignedIn: Boolean(window.puter?.auth?.isSignedIn?.()),
+          });
         }}
-        onError={() => setErrorMessage("Could not load Puter.js. Check your connection and try again.")}
+        onError={() => {
+          const message = "Could not load Puter.js. Check your connection and try again.";
+          setErrorMessage(message);
+          setDiagnostics("Puter script load failed", {
+            src: SCRIPT_SRC,
+          });
+        }}
       />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -220,6 +297,31 @@ export function CaptureImageGenerator() {
             If test mode works but normal mode fails, the issue is likely Puter account auth,
             credits, or provider-side validation rather than this UI.
           </p>
+          <div className="mt-4 rounded-[1rem] border border-border bg-[#f8efe3] p-4">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-xs uppercase tracking-[0.16em] text-ink-soft">Diagnostics</p>
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!diagnosticText) {
+                    return;
+                  }
+
+                  try {
+                    await navigator.clipboard.writeText(diagnosticText);
+                  } catch (error) {
+                    setDiagnostics("Clipboard copy failed", error);
+                  }
+                }}
+                className="rounded-full border border-border bg-white/70 px-3 py-1 text-xs font-medium text-ink-soft transition hover:border-accent hover:text-accent-strong"
+              >
+                Copy
+              </button>
+            </div>
+            <pre className="mt-3 max-h-56 overflow-auto rounded-[0.9rem] bg-[#201914] p-3 font-mono text-xs leading-6 text-[#fff7ef] whitespace-pre-wrap">
+              {diagnosticText || "No diagnostic payload yet. Generate or sign in to capture the raw Puter response."}
+            </pre>
+          </div>
         </div>
 
         <div className="capture-image-stage rounded-[1.5rem] border border-border bg-[rgba(32,25,20,0.04)] p-4">
