@@ -52,7 +52,6 @@ export function OnboardingGuide() {
   const [isOpen, setIsOpen] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
   const [rect, setRect] = useState<DOMRect | null>(null);
-  const [viewport, setViewport] = useState({ width: 0, height: 0 });
   const guideRequested = searchParams.get("guide") === "1";
   const step = steps[stepIndex];
 
@@ -112,10 +111,6 @@ export function OnboardingGuide() {
 
       window.requestAnimationFrame(() => {
         setRect(element.getBoundingClientRect());
-        setViewport({
-          width: window.innerWidth,
-          height: window.innerHeight,
-        });
       });
     }
 
@@ -150,46 +145,79 @@ export function OnboardingGuide() {
     };
   }, [rect]);
 
-  const overlayMaskStyle = useMemo(() => {
-    if (!rect || viewport.width === 0 || viewport.height === 0) {
-      return undefined;
-    }
-
-    const x = Math.max(0, rect.left - 10);
-    const y = Math.max(0, rect.top - 10);
-    const width = rect.width + 20;
-    const height = rect.height + 20;
-    const radius = 32;
-    const svg = `
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${viewport.width} ${viewport.height}">
-        <rect width="${viewport.width}" height="${viewport.height}" fill="white"/>
-        <rect x="${x}" y="${y}" width="${width}" height="${height}" rx="${radius}" ry="${radius}" fill="transparent"/>
-      </svg>
-    `;
-    const maskImage = `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
-
-    return {
-      WebkitMaskImage: maskImage,
-      maskImage,
-      WebkitMaskMode: "alpha",
-      maskMode: "alpha",
-      WebkitMaskRepeat: "no-repeat",
-      maskRepeat: "no-repeat",
-      WebkitMaskSize: "100% 100%",
-      maskSize: "100% 100%",
-    };
-  }, [rect, viewport]);
-
   if (!isOpen || pathname !== "/") {
     return null;
   }
 
   return (
     <div className="pointer-events-none fixed inset-0 z-50">
-      <div
-        className="absolute inset-0 bg-[rgba(32,25,20,0.46)] backdrop-blur-[3px]"
-        style={overlayMaskStyle}
-      />
+      {rect ? (
+        <>
+          <div
+            className="absolute left-0 top-0 right-0 bg-[rgba(32,25,20,0.46)] backdrop-blur-[3px]"
+            style={{ height: Math.max(0, rect.top - 10) }}
+          />
+          <div
+            className="absolute left-0 right-0 bottom-0 bg-[rgba(32,25,20,0.46)] backdrop-blur-[3px]"
+            style={{ top: rect.bottom + 10 }}
+          />
+          <div
+            className="absolute left-0 bg-[rgba(32,25,20,0.46)] backdrop-blur-[3px]"
+            style={{
+              top: rect.top + 22,
+              width: Math.max(0, rect.left - 10),
+              height: Math.max(0, rect.height - 24),
+            }}
+          />
+          <div
+            className="absolute right-0 bg-[rgba(32,25,20,0.46)] backdrop-blur-[3px]"
+            style={{
+              top: rect.top + 22,
+              width: Math.max(0, window.innerWidth - rect.right - 10),
+              height: Math.max(0, rect.height - 24),
+            }}
+          />
+
+          <div
+            className="absolute bg-[radial-gradient(circle_at_bottom_right,transparent_31px,rgba(32,25,20,0.46)_32px)] backdrop-blur-[3px]"
+            style={{
+              left: Math.max(0, rect.left - 10),
+              top: Math.max(0, rect.top - 10),
+              width: 42,
+              height: 42,
+            }}
+          />
+          <div
+            className="absolute bg-[radial-gradient(circle_at_bottom_left,transparent_31px,rgba(32,25,20,0.46)_32px)] backdrop-blur-[3px]"
+            style={{
+              left: rect.right - 32,
+              top: Math.max(0, rect.top - 10),
+              width: 42,
+              height: 42,
+            }}
+          />
+          <div
+            className="absolute bg-[radial-gradient(circle_at_top_right,transparent_31px,rgba(32,25,20,0.46)_32px)] backdrop-blur-[3px]"
+            style={{
+              left: Math.max(0, rect.left - 10),
+              top: rect.bottom - 32,
+              width: 42,
+              height: 42,
+            }}
+          />
+          <div
+            className="absolute bg-[radial-gradient(circle_at_top_left,transparent_31px,rgba(32,25,20,0.46)_32px)] backdrop-blur-[3px]"
+            style={{
+              left: rect.right - 32,
+              top: rect.bottom - 32,
+              width: 42,
+              height: 42,
+            }}
+          />
+        </>
+      ) : (
+        <div className="absolute inset-0 bg-[rgba(32,25,20,0.46)] backdrop-blur-[3px]" />
+      )}
 
       {rect ? (
         <div
