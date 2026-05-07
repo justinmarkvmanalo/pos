@@ -159,35 +159,28 @@ export function OnboardingGuide() {
             const top = rect.top - highlightInset;
             const width = rect.width + highlightInset * 2;
             const height = rect.height + highlightInset * 2;
-            const right = left + width;
-            const bottom = top + height;
+            const radius = 32;
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            const cutoutPath = [
+              `M0 0H${viewportWidth}V${viewportHeight}H0Z`,
+              `M${left + radius} ${top}`,
+              `H${left + width - radius}`,
+              `Q${left + width} ${top} ${left + width} ${top + radius}`,
+              `V${top + height - radius}`,
+              `Q${left + width} ${top + height} ${left + width - radius} ${top + height}`,
+              `H${left + radius}`,
+              `Q${left} ${top + height} ${left} ${top + height - radius}`,
+              `V${top + radius}`,
+              `Q${left} ${top} ${left + radius} ${top}`,
+              "Z",
+            ].join(" ");
 
             return (
               <>
-                <div
-                  className="absolute left-0 top-0 right-0 bg-[rgba(32,25,20,0.52)]"
-                  style={{ height: Math.max(0, top) }}
-                />
-                <div
-                  className="absolute left-0 right-0 bottom-0 bg-[rgba(32,25,20,0.52)]"
-                  style={{ top: bottom }}
-                />
-                <div
-                  className="absolute left-0 bg-[rgba(32,25,20,0.52)]"
-                  style={{
-                    top,
-                    width: Math.max(0, left),
-                    height,
-                  }}
-                />
-                <div
-                  className="absolute right-0 bg-[rgba(32,25,20,0.52)]"
-                  style={{
-                    top,
-                    width: Math.max(0, window.innerWidth - right),
-                    height,
-                  }}
-                />
+                <svg className="absolute inset-0 h-full w-full" aria-hidden="true">
+                  <path d={cutoutPath} fill="rgba(32,25,20,0.52)" fillRule="evenodd" />
+                </svg>
               </>
             );
           })()}
