@@ -13,7 +13,7 @@ export default async function ReviewPage() {
 
   return (
     <AppShell>
-      <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+      <section className="grid items-start gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <div className="panel rounded-[2rem] p-6 sm:p-8">
           <p className="text-sm uppercase tracking-[0.2em] text-ink-soft">Weekly review</p>
           <h1 className="display mt-2 text-4xl">Reflection with actual operating data</h1>

@@ -16,7 +16,7 @@ export default async function Home() {
 
   return (
     <AppShell>
-      <section className="fade-up grid gap-6 xl:grid-cols-[1.4fr_0.9fr]">
+      <section className="fade-up grid items-start gap-6 xl:grid-cols-[1.4fr_0.9fr]">
         <div className="panel-raised rounded-[2rem] p-6 sm:p-8">
           <p className="text-sm uppercase tracking-[0.3em] text-ink-soft">
             Personal command center
@@ -94,7 +94,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+      <section className="grid items-start gap-6 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="panel-raised rounded-[2rem] p-6 sm:p-8">
           <div className="flex items-center justify-between">
             <div>

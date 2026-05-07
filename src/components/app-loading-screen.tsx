@@ -7,7 +7,7 @@ function SkeletonBlock({ className }: { className: string }) {
 export function AppLoadingScreen() {
   return (
     <AppShell>
-      <section className="grid gap-6 xl:grid-cols-[1.4fr_0.9fr]">
+      <section className="grid items-start gap-6 xl:grid-cols-[1.4fr_0.9fr]">
         <div className="panel rounded-[2rem] p-6 sm:p-8">
           <SkeletonBlock className="h-4 w-40 rounded-full" />
           <SkeletonBlock className="mt-5 h-14 w-full max-w-2xl" />
@@ -34,7 +34,7 @@ export function AppLoadingScreen() {
         </div>
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+      <section className="grid items-start gap-6 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="panel rounded-[2rem] p-6 sm:p-8">
           <div className="flex items-center justify-between gap-4">
             <div className="space-y-3">

@@ -9,7 +9,7 @@ export default async function CapturePage() {
 
   return (
     <AppShell>
-      <section className="grid gap-6 lg:grid-cols-[1fr_0.9fr]">
+      <section className="grid items-start gap-6 lg:grid-cols-[1fr_0.9fr]">
         <div className="panel rounded-[2rem] p-6 sm:p-8">
           <p className="text-sm uppercase tracking-[0.2em] text-ink-soft">Inbox capture</p>
           <h1 className="display mt-2 text-4xl">Save it now, organize it later</h1>
