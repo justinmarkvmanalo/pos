@@ -47,6 +47,9 @@ function getVisibleElement(selector: string) {
 }
 
 export function OnboardingGuide() {
+  const highlightInset = 10;
+  const highlightRadius = 32;
+  const highlightSize = highlightRadius * 2;
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
@@ -153,67 +156,81 @@ export function OnboardingGuide() {
     <div className="pointer-events-none fixed inset-0 z-50">
       {rect ? (
         <>
+          {(() => {
+            const left = rect.left - highlightInset;
+            const top = rect.top - highlightInset;
+            const width = rect.width + highlightInset * 2;
+            const height = rect.height + highlightInset * 2;
+            const right = left + width;
+            const bottom = top + height;
+            const middleHeight = Math.max(0, height - highlightSize);
+
+            return (
+              <>
           <div
             className="absolute left-0 top-0 right-0 bg-[rgba(32,25,20,0.52)]"
-            style={{ height: Math.max(0, rect.top - 10) }}
+            style={{ height: Math.max(0, top + highlightRadius) }}
           />
           <div
             className="absolute left-0 right-0 bottom-0 bg-[rgba(32,25,20,0.52)]"
-            style={{ top: rect.bottom + 10 }}
+            style={{ top: bottom - highlightRadius }}
           />
           <div
             className="absolute left-0 bg-[rgba(32,25,20,0.52)]"
             style={{
-              top: rect.top - 10,
-              width: Math.max(0, rect.left - 10),
-              height: rect.height + 20,
+              top: top + highlightRadius,
+              width: Math.max(0, left),
+              height: middleHeight,
             }}
           />
           <div
             className="absolute right-0 bg-[rgba(32,25,20,0.52)]"
             style={{
-              top: rect.top - 10,
-              width: Math.max(0, window.innerWidth - rect.right - 10),
-              height: rect.height + 20,
+              top: top + highlightRadius,
+              width: Math.max(0, window.innerWidth - right),
+              height: middleHeight,
             }}
           />
 
           <div
             className="absolute bg-[radial-gradient(circle_at_bottom_right,transparent_31px,rgba(32,25,20,0.52)_32px)]"
             style={{
-              left: Math.max(0, rect.left - 10),
-              top: Math.max(0, rect.top - 10),
-              width: 42,
-              height: 42,
+              left: left,
+              top: top,
+              width: highlightSize,
+              height: highlightSize,
             }}
           />
           <div
             className="absolute bg-[radial-gradient(circle_at_bottom_left,transparent_31px,rgba(32,25,20,0.52)_32px)]"
             style={{
-              left: rect.right - 32,
-              top: Math.max(0, rect.top - 10),
-              width: 42,
-              height: 42,
+              left: right - highlightSize,
+              top: top,
+              width: highlightSize,
+              height: highlightSize,
             }}
           />
           <div
             className="absolute bg-[radial-gradient(circle_at_top_right,transparent_31px,rgba(32,25,20,0.52)_32px)]"
             style={{
-              left: Math.max(0, rect.left - 10),
-              top: rect.bottom - 32,
-              width: 42,
-              height: 42,
+              left: left,
+              top: bottom - highlightSize,
+              width: highlightSize,
+              height: highlightSize,
             }}
           />
           <div
             className="absolute bg-[radial-gradient(circle_at_top_left,transparent_31px,rgba(32,25,20,0.52)_32px)]"
             style={{
-              left: rect.right - 32,
-              top: rect.bottom - 32,
-              width: 42,
-              height: 42,
+              left: right - highlightSize,
+              top: bottom - highlightSize,
+              width: highlightSize,
+              height: highlightSize,
             }}
           />
+              </>
+            );
+          })()}
         </>
       ) : (
         <div className="absolute inset-0 bg-[rgba(32,25,20,0.52)]" />
@@ -223,10 +240,10 @@ export function OnboardingGuide() {
         <div
           className="absolute rounded-[2rem] border border-white/90 bg-transparent shadow-[0_0_0_10px_rgba(255,247,239,0.08),0_22px_48px_rgba(32,25,20,0.18)] transition-all duration-300"
           style={{
-            left: rect.left - 10,
-            top: rect.top - 10,
-            width: rect.width + 20,
-            height: rect.height + 20,
+            left: rect.left - highlightInset,
+            top: rect.top - highlightInset,
+            width: rect.width + highlightInset * 2,
+            height: rect.height + highlightInset * 2,
           }}
         />
       ) : null}
