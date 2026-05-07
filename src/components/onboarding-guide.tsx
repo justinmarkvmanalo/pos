@@ -48,8 +48,6 @@ function getVisibleElement(selector: string) {
 
 export function OnboardingGuide() {
   const highlightInset = 10;
-  const highlightRadius = 32;
-  const highlightSize = highlightRadius * 2;
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
@@ -163,71 +161,33 @@ export function OnboardingGuide() {
             const height = rect.height + highlightInset * 2;
             const right = left + width;
             const bottom = top + height;
-            const middleHeight = Math.max(0, height - highlightSize);
 
             return (
               <>
-          <div
-            className="absolute left-0 top-0 right-0 bg-[rgba(32,25,20,0.52)]"
-            style={{ height: Math.max(0, top + highlightRadius) }}
-          />
-          <div
-            className="absolute left-0 right-0 bottom-0 bg-[rgba(32,25,20,0.52)]"
-            style={{ top: bottom - highlightRadius }}
-          />
-          <div
-            className="absolute left-0 bg-[rgba(32,25,20,0.52)]"
-            style={{
-              top: top + highlightRadius,
-              width: Math.max(0, left),
-              height: middleHeight,
-            }}
-          />
-          <div
-            className="absolute right-0 bg-[rgba(32,25,20,0.52)]"
-            style={{
-              top: top + highlightRadius,
-              width: Math.max(0, window.innerWidth - right),
-              height: middleHeight,
-            }}
-          />
-
-          <div
-            className="absolute bg-[radial-gradient(circle_at_bottom_right,transparent_31px,rgba(32,25,20,0.52)_32px)]"
-            style={{
-              left: left,
-              top: top,
-              width: highlightSize,
-              height: highlightSize,
-            }}
-          />
-          <div
-            className="absolute bg-[radial-gradient(circle_at_bottom_left,transparent_31px,rgba(32,25,20,0.52)_32px)]"
-            style={{
-              left: right - highlightSize,
-              top: top,
-              width: highlightSize,
-              height: highlightSize,
-            }}
-          />
-          <div
-            className="absolute bg-[radial-gradient(circle_at_top_right,transparent_31px,rgba(32,25,20,0.52)_32px)]"
-            style={{
-              left: left,
-              top: bottom - highlightSize,
-              width: highlightSize,
-              height: highlightSize,
-            }}
-          />
-          <div
-            className="absolute bg-[radial-gradient(circle_at_top_left,transparent_31px,rgba(32,25,20,0.52)_32px)]"
-            style={{
-              left: right - highlightSize,
-              top: bottom - highlightSize,
-              width: highlightSize,
-              height: highlightSize,
-            }}
-          />
+                <div
+                  className="absolute left-0 top-0 right-0 bg-[rgba(32,25,20,0.52)]"
+                  style={{ height: Math.max(0, top) }}
+                />
+                <div
+                  className="absolute left-0 right-0 bottom-0 bg-[rgba(32,25,20,0.52)]"
+                  style={{ top: bottom }}
+                />
+                <div
+                  className="absolute left-0 bg-[rgba(32,25,20,0.52)]"
+                  style={{
+                    top,
+                    width: Math.max(0, left),
+                    height,
+                  }}
+                />
+                <div
+                  className="absolute right-0 bg-[rgba(32,25,20,0.52)]"
+                  style={{
+                    top,
+                    width: Math.max(0, window.innerWidth - right),
+                    height,
+                  }}
+                />
               </>
             );
           })()}
