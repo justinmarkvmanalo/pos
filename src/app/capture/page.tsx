@@ -10,7 +10,7 @@ export default async function CapturePage() {
   return (
     <AppShell>
       <section className="grid items-start gap-6 lg:grid-cols-[1fr_0.9fr]">
-        <div className="panel rounded-[2rem] p-6 sm:p-8">
+        <div data-tour="capture-intro" className="panel rounded-[2rem] p-6 sm:p-8">
         <p className="text-sm uppercase tracking-[0.2em] text-ink-soft">Inbox capture</p>
         <h1 className="display mt-2 text-4xl">Save it now, organize it later</h1>
         <p className="mt-4 max-w-2xl text-base leading-7 text-ink-soft">
@@ -24,7 +24,7 @@ export default async function CapturePage() {
           </div>
         </div>
 
-        <div className="panel rounded-[2rem] p-6">
+        <div data-tour="capture-inbox" className="panel rounded-[2rem] p-6">
           <h2 className="display text-3xl">Your inbox</h2>
           <QuickCaptureForm captures={captures} />
         </div>

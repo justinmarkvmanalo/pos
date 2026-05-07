@@ -5,38 +5,133 @@ import { useEffect, useMemo, useState } from "react";
 
 const GUIDE_KEY = "winos-guide-complete";
 
-const steps = [
-  {
-    selector: '[data-tour="navigation"]',
-    title: "Move fast",
-    description: "Use these tabs to jump between dashboard, goals, habits, capture, and review.",
-  },
-  {
-    selector: '[data-tour="daily-focus"]',
-    title: "Start here",
-    description: "Keep today small. Add the few tasks that actually matter.",
-  },
-  {
-    selector: '[data-tour="habit-map"]',
-    title: "Log rhythm",
-    description: "Track consistency here instead of guessing how the week feels.",
-  },
-  {
-    selector: '[data-tour="capture"]',
-    title: "Catch loose ideas",
-    description: "Use capture for anything not ready to become a real task yet.",
-  },
-  {
-    selector: '[data-tour="review"]',
-    title: "Close the loop",
-    description: "Review shows what moved, what stalled, and what to change next.",
-  },
-  {
-    selector: '[data-tour="settings"]',
-    title: "Need anything later?",
-    description: "Replay this guide, open your profile, or log out from settings.",
-  },
-] as const;
+const stepsByPath = {
+  "/": [
+    {
+      selector: '[data-tour="navigation"]',
+      title: "Move fast",
+      description: "Use these tabs to jump between dashboard, goals, habits, capture, and review.",
+    },
+    {
+      selector: '[data-tour="daily-focus"]',
+      title: "Start here",
+      description: "Keep today small. Add the few tasks that actually matter.",
+    },
+    {
+      selector: '[data-tour="habit-map"]',
+      title: "Log rhythm",
+      description: "Track consistency here instead of guessing how the week feels.",
+    },
+    {
+      selector: '[data-tour="capture"]',
+      title: "Catch loose ideas",
+      description: "Use capture for anything not ready to become a real task yet.",
+    },
+    {
+      selector: '[data-tour="review"]',
+      title: "Close the loop",
+      description: "Review shows what moved, what stalled, and what to change next.",
+    },
+    {
+      selector: '[data-tour="settings"]',
+      title: "Need anything later?",
+      description: "Replay this guide, open your profile, or log out from settings.",
+    },
+  ],
+  "/goals": [
+    {
+      selector: '[data-tour="navigation"]',
+      title: "Move between areas",
+      description: "Use the top navigation to switch between your operating views.",
+    },
+    {
+      selector: '[data-tour="goals-create"]',
+      title: "Add a goal",
+      description: "Create a goal here, or open the idea library if you want a starting template.",
+    },
+    {
+      selector: '[data-tour="goals-list"]',
+      title: "Work the goal",
+      description: "Each goal card tracks progress, deadlines, and the next milestone to move.",
+    },
+    {
+      selector: '[data-tour="goals-trophies"]',
+      title: "See finished work",
+      description: "Completed goals collect in the trophy case so wins stay visible.",
+    },
+    {
+      selector: '[data-tour="settings"]',
+      title: "Replay later",
+      description: "Open settings anytime to replay the guide or manage your account.",
+    },
+  ],
+  "/habits": [
+    {
+      selector: '[data-tour="navigation"]',
+      title: "Move between areas",
+      description: "Use the top navigation to jump back to the rest of the system.",
+    },
+    {
+      selector: '[data-tour="habits-overview"]',
+      title: "Set the rhythm",
+      description: "Create habits here and watch the heatmap fill in as the week moves.",
+    },
+    {
+      selector: '[data-tour="habits-pulse"]',
+      title: "Track the pace",
+      description: "This section groups habits, shows streaks, and lets you log progress fast.",
+    },
+    {
+      selector: '[data-tour="settings"]',
+      title: "Replay later",
+      description: "Use settings if you want to run the guide again.",
+    },
+  ],
+  "/capture": [
+    {
+      selector: '[data-tour="navigation"]',
+      title: "Move between areas",
+      description: "Navigation keeps capture connected to goals, habits, and review.",
+    },
+    {
+      selector: '[data-tour="capture-intro"]',
+      title: "Catch it quickly",
+      description: "This side is for fast dumping before anything gets organized.",
+    },
+    {
+      selector: '[data-tour="capture-inbox"]',
+      title: "Review the inbox",
+      description: "Your recent captures stay here until you move them into a real workflow.",
+    },
+    {
+      selector: '[data-tour="settings"]',
+      title: "Replay later",
+      description: "Use settings anytime to replay the capture guide.",
+    },
+  ],
+  "/review": [
+    {
+      selector: '[data-tour="navigation"]',
+      title: "Move between areas",
+      description: "Navigation lets you compare review signals with goals, habits, and capture.",
+    },
+    {
+      selector: '[data-tour="review-main"]',
+      title: "Generate the review",
+      description: "This main panel turns real activity into a weekly summary and next-step guidance.",
+    },
+    {
+      selector: '[data-tour="review-side"]',
+      title: "Cross-check the signals",
+      description: "The side panels show goal and habit context while you reflect on the week.",
+    },
+    {
+      selector: '[data-tour="settings"]',
+      title: "Replay later",
+      description: "Replay this walkthrough from settings whenever you need it.",
+    },
+  ],
+} as const;
 
 function getVisibleElement(selector: string) {
   const matches = Array.from(document.querySelectorAll<HTMLElement>(selector));
@@ -54,10 +149,11 @@ export function OnboardingGuide() {
   const [stepIndex, setStepIndex] = useState(0);
   const [rect, setRect] = useState<DOMRect | null>(null);
   const guideRequested = searchParams.get("guide") === "1";
+  const steps = stepsByPath[pathname as keyof typeof stepsByPath] ?? [];
   const step = steps[stepIndex];
 
   useEffect(() => {
-    if (pathname !== "/") {
+    if (!steps.length) {
       return;
     }
 
@@ -68,10 +164,14 @@ export function OnboardingGuide() {
         setIsOpen(true);
       });
     }
-  }, [guideRequested, pathname]);
+  }, [guideRequested, pathname, steps.length]);
 
   useEffect(() => {
     function handleOpenGuide() {
+      if (!steps.length) {
+        return;
+      }
+
       setStepIndex(0);
       setIsOpen(true);
     }
@@ -80,7 +180,7 @@ export function OnboardingGuide() {
     return () => {
       window.removeEventListener("winos:open-guide", handleOpenGuide);
     };
-  }, []);
+  }, [steps.length]);
 
   useEffect(() => {
     if (!guideRequested) {
@@ -93,7 +193,7 @@ export function OnboardingGuide() {
   }, [guideRequested]);
 
   useEffect(() => {
-    if (!isOpen || pathname !== "/") {
+    if (!isOpen || !steps.length || !step) {
       return;
     }
 
@@ -123,7 +223,7 @@ export function OnboardingGuide() {
       window.removeEventListener("resize", syncRect);
       window.removeEventListener("scroll", syncRect, true);
     };
-  }, [isOpen, pathname, step.selector]);
+  }, [isOpen, step, steps.length]);
 
   const cardStyle = useMemo(() => {
     if (!rect) {
@@ -146,7 +246,7 @@ export function OnboardingGuide() {
     };
   }, [rect]);
 
-  if (!isOpen || pathname !== "/") {
+  if (!isOpen || !step || !steps.length) {
     return null;
   }
 

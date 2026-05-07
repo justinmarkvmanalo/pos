@@ -14,7 +14,7 @@ export default async function ReviewPage() {
   return (
     <AppShell>
       <section className="grid items-start gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-        <div className="panel rounded-[2rem] p-6 sm:p-8">
+        <div data-tour="review-main" className="panel rounded-[2rem] p-6 sm:p-8">
           <p className="text-sm uppercase tracking-[0.2em] text-ink-soft">Weekly review</p>
           <h1 className="display mt-2 text-4xl">Reflection with actual operating data</h1>
           <p className="mt-4 max-w-3xl text-base leading-7 text-ink-soft">Use the week&apos;s real activity to decide what changes next.</p>
@@ -138,7 +138,7 @@ export default async function ReviewPage() {
           </div>
         </div>
 
-        <div className="grid gap-6">
+        <div data-tour="review-side" className="grid gap-6">
           <article className="panel rounded-[2rem] p-6">
             <p className="text-sm uppercase tracking-[0.16em] text-ink-soft">Goal pulse</p>
             <div className="mt-4 space-y-3">

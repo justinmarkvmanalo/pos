@@ -51,13 +51,11 @@ export function HeaderSettingsMenu({
 
   function openGuide() {
     setIsOpen(false);
+    window.dispatchEvent(new CustomEvent("winos:open-guide"));
 
-    if (pathname === "/") {
-      window.dispatchEvent(new CustomEvent("winos:open-guide"));
-      return;
-    }
-
-    router.push("/?guide=1");
+    const url = new URL(window.location.href);
+    url.searchParams.set("guide", "1");
+    router.push(`${pathname}?${url.searchParams.toString()}`);
   }
 
   return (

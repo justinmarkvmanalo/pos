@@ -18,7 +18,7 @@ export default async function GoalsPage() {
 
   return (
     <AppShell>
-      <section className="panel rounded-[2rem] p-6 sm:p-8">
+      <section data-tour="goals-create" className="panel rounded-[2rem] p-6 sm:p-8">
         <p className="text-sm uppercase tracking-[0.2em] text-ink-soft">Goal tracker</p>
         <h1 className="display mt-2 text-4xl">Milestones with deadline pressure</h1>
         <p className="mt-4 max-w-3xl text-base leading-7 text-ink-soft">
@@ -28,7 +28,7 @@ export default async function GoalsPage() {
       </section>
 
       <section className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="grid gap-6 xl:grid-cols-2">
+        <div data-tour="goals-list" className="grid gap-6 xl:grid-cols-2">
         {goals.length === 0 ? (
           <article className="panel rounded-[2rem] p-6 text-sm text-ink-soft xl:col-span-2">
             No goals yet. Add your first goal above, then break it into milestones here.
@@ -118,7 +118,7 @@ export default async function GoalsPage() {
           </article>
         ))}
         </div>
-        <aside className="panel self-start rounded-[2rem] p-6">
+        <aside data-tour="goals-trophies" className="panel self-start rounded-[2rem] p-6">
           <p className="text-sm uppercase tracking-[0.2em] text-ink-soft">Trophy case</p>
           <h2 className="mt-2 text-2xl font-semibold">Finished goals</h2>
           <p className="mt-3 text-sm leading-6 text-ink-soft">Completed goals land here.</p>

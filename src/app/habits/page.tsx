@@ -36,7 +36,7 @@ export default async function HabitsPage() {
   return (
     <AppShell>
       <section className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
-        <div className="panel rounded-[2rem] p-6 sm:p-8">
+        <div data-tour="habits-overview" className="panel rounded-[2rem] p-6 sm:p-8">
           <div className="mb-5 flex items-center gap-3 md:hidden">
             <Image
               src="/winos-logo.png"
@@ -61,7 +61,7 @@ export default async function HabitsPage() {
         </div>
 
         <div className="grid content-start auto-rows-max gap-6 self-start">
-          <article className="panel rounded-[2rem] p-6">
+          <article data-tour="habits-pulse" className="panel rounded-[2rem] p-6">
             <div>
               <p className="text-sm uppercase tracking-[0.16em] text-ink-soft">Habit pulse</p>
               <p className="mt-2 text-sm leading-6 text-ink-soft">See pace, streaks, and today&apos;s log at a glance.</p>
