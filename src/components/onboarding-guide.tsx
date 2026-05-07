@@ -151,7 +151,40 @@ export function OnboardingGuide() {
 
   return (
     <div className="pointer-events-none fixed inset-0 z-50">
-      <div className="absolute inset-0 bg-[rgba(32,25,20,0.46)] backdrop-blur-[3px]" />
+      {rect ? (
+        <>
+          <div
+            className="absolute left-0 top-0 bg-[rgba(32,25,20,0.46)] backdrop-blur-[3px]"
+            style={{ width: "100%", height: Math.max(0, rect.top - 10) }}
+          />
+          <div
+            className="absolute left-0 bg-[rgba(32,25,20,0.46)] backdrop-blur-[3px]"
+            style={{
+              top: Math.max(0, rect.top - 10),
+              width: Math.max(0, rect.left - 10),
+              height: rect.height + 20,
+            }}
+          />
+          <div
+            className="absolute bg-[rgba(32,25,20,0.46)] backdrop-blur-[3px]"
+            style={{
+              top: Math.max(0, rect.top - 10),
+              left: rect.right + 10,
+              right: 0,
+              height: rect.height + 20,
+            }}
+          />
+          <div
+            className="absolute left-0 bottom-0 bg-[rgba(32,25,20,0.46)] backdrop-blur-[3px]"
+            style={{
+              top: rect.bottom + 10,
+              width: "100%",
+            }}
+          />
+        </>
+      ) : (
+        <div className="absolute inset-0 bg-[rgba(32,25,20,0.46)] backdrop-blur-[3px]" />
+      )}
 
       {rect ? (
         <div
