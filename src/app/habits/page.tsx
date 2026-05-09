@@ -2,6 +2,7 @@ import Image from "next/image";
 import { connection } from "next/server";
 import { AppShell } from "@/components/app-shell";
 import { HabitCreateControls } from "@/components/habit-create-controls";
+import { HabitDeleteForm } from "@/components/habit-delete-form";
 import { Heatmap } from "@/components/heatmap";
 import { HabitLogButton } from "@/components/habit-log-button";
 import { getHabitsSnapshot } from "@/lib/data";
@@ -140,11 +141,14 @@ export default async function HabitsPage() {
                                   </span>
                                 </div>
                               </div>
-                              <HabitLogButton
-                                habitId={habit.id}
-                                formClassName=""
-                                buttonClassName="inline-flex w-fit rounded-full border border-border bg-[#fff8ef] px-3 py-2 text-sm font-semibold text-foreground transition hover:border-accent disabled:opacity-60"
-                              />
+                              <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                                <HabitLogButton
+                                  habitId={habit.id}
+                                  formClassName=""
+                                  buttonClassName="inline-flex w-fit rounded-full border border-border bg-[#fff8ef] px-3 py-2 text-sm font-semibold text-foreground transition hover:border-accent disabled:opacity-60"
+                                />
+                                <HabitDeleteForm habitId={habit.id} />
+                              </div>
                             </div>
 
                             <div className="mt-3 h-2 overflow-hidden rounded-full bg-[#eadbc9]">

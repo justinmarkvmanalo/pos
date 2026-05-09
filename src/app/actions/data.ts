@@ -512,6 +512,34 @@ export async function createSuggestedHabitAction(
   return createHabitAction(successActionState(""), formData);
 }
 
+export async function deleteHabitAction(formData: FormData) {
+  const { supabase } = await getSupabaseOrThrow();
+
+  const habitId = getTrimmedField(formData, "habit_id");
+
+  if (!habitId) {
+    return;
+  }
+
+  const { data: habit, error: habitError } = await supabase
+    .from("habits")
+    .select("id")
+    .eq("id", habitId)
+    .maybeSingle();
+
+  if (habitError || !habit) {
+    return;
+  }
+
+  const { error } = await supabase.from("habits").delete().eq("id", habitId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidateApp();
+}
+
 export async function logHabitAction(formData: FormData) {
   const { supabase, userId } = await getSupabaseOrThrow();
 
