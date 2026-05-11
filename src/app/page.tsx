@@ -17,31 +17,36 @@ export default async function Home() {
   return (
     <AppShell>
       <section className="fade-up grid items-start gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.95fr)]">
-        <div className="panel-raised rounded-[2rem] p-6 sm:p-8">
-          <p className="text-sm uppercase tracking-[0.3em] text-ink-soft">
-            Personal command center
-          </p>
+        <div className="panel-raised dashboard-band rounded-[2rem] p-6 sm:p-8">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="accent-chip rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em]">
+              Daily command center
+            </span>
+            <span className="rounded-full border border-border/80 bg-white/55 px-3 py-1 text-xs text-ink-soft">
+              Built for focus, not feed scrolling
+            </span>
+          </div>
           <div className="mt-4 grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(220px,0.8fr)] xl:items-end">
             <div className="max-w-2xl">
               <h1 className="display text-4xl leading-tight sm:text-5xl">
-                Start with the work that compounds.
+                Run the day from one calm control surface.
               </h1>
               <p className="mt-4 max-w-xl text-base leading-7 text-ink-soft sm:text-lg">
-                Focus on today, keep your habits moving, and review the week before it drifts.
+                See what needs attention, keep routines alive, and close the week before it slips.
               </p>
             </div>
-            <div className="glow-pulse rounded-[1.5rem] bg-[linear-gradient(145deg,#201914_0%,#3b2d25_100%)] px-5 py-4 text-[#fff7ef] xl:self-stretch">
-              <p className="text-xs uppercase tracking-[0.2em] text-[#d7c6b8]">System note</p>
+            <div className="glow-pulse rounded-[1.65rem] bg-[linear-gradient(145deg,#18222d_0%,#2d3d4b_62%,#41515f_100%)] px-5 py-4 text-[#f7f4ef] xl:self-stretch">
+              <p className="text-xs uppercase tracking-[0.2em] text-[#cfd8df]">System note</p>
               <p className="mt-2 max-w-52 text-sm leading-6">
-                Add only what matters. The dashboard stays sparse on purpose.
+                Keep the board light. If it does not guide action, it should not live here.
               </p>
               <div className="mt-5 grid gap-3 text-sm text-[#f5e4d6]">
                 <div className="rounded-[1rem] border border-white/10 bg-white/6 px-3 py-3">
-                  <p className="text-[11px] uppercase tracking-[0.18em] text-[#d7c6b8]">Focus</p>
+                  <p className="text-[11px] uppercase tracking-[0.18em] text-[#cfd8df]">Focus</p>
                   <p className="mt-1 font-medium">{snapshot.dailyFocus.topTasks.length} tasks loaded</p>
                 </div>
                 <div className="rounded-[1rem] border border-white/10 bg-white/6 px-3 py-3">
-                  <p className="text-[11px] uppercase tracking-[0.18em] text-[#d7c6b8]">Review</p>
+                  <p className="text-[11px] uppercase tracking-[0.18em] text-[#cfd8df]">Review</p>
                   <p className="mt-1 font-medium">{snapshot.review.readiness}</p>
                 </div>
               </div>
@@ -49,7 +54,7 @@ export default async function Home() {
           </div>
 
           <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            <div className="soft-enter rounded-[1.5rem] bg-[rgba(255,251,245,0.88)] p-5">
+            <div className="stat-tile soft-enter rounded-[1.5rem] p-5">
               <p className="text-sm text-ink-soft">Task completion</p>
               <p className="mt-2 text-3xl font-semibold">{completion}%</p>
               <p className="mt-2 text-sm text-ink-soft">
@@ -57,14 +62,14 @@ export default async function Home() {
                 tasks closed today.
               </p>
             </div>
-            <div className="soft-enter rounded-[1.5rem] bg-[rgba(255,251,245,0.88)] p-5">
+            <div className="stat-tile soft-enter rounded-[1.5rem] p-5">
               <p className="text-sm text-ink-soft">Habit hit rate</p>
               <p className="mt-2 text-3xl font-semibold">{snapshot.habits.completionRate}%</p>
               <p className="mt-2 text-sm text-ink-soft">
                 Percentage of weekly habit targets completed so far.
               </p>
             </div>
-            <div className="soft-enter rounded-[1.5rem] bg-[rgba(255,251,245,0.88)] p-5">
+            <div className="stat-tile soft-enter rounded-[1.5rem] p-5">
               <p className="text-sm text-ink-soft">Capture inbox</p>
               <p className="mt-2 text-3xl font-semibold">{snapshot.captures.length}</p>
               <p className="mt-2 text-sm text-ink-soft">
@@ -80,17 +85,17 @@ export default async function Home() {
               <p className="text-sm uppercase tracking-[0.2em] text-ink-soft">Weekly review</p>
               <h2 className="display mt-2 text-3xl">Friday reset</h2>
             </div>
-            <div className="rounded-full bg-accent-soft px-3 py-1 text-sm font-medium text-accent-strong">
+            <div className="accent-chip rounded-full px-3 py-1 text-sm font-medium">
               {snapshot.review.readiness}
             </div>
           </div>
           <p className="mt-4 text-sm leading-6 text-ink-soft">{snapshot.review.prompt}</p>
           <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-            <div className="rounded-[1.25rem] border border-border bg-[rgba(255,251,245,0.88)] px-4 py-4">
+            <div className="panel-outline rounded-[1.25rem] px-4 py-4">
               <p className="text-[11px] uppercase tracking-[0.18em] text-ink-soft">Highlights</p>
               <p className="mt-2 text-2xl font-semibold">{snapshot.review.highlights.length}</p>
             </div>
-            <div className="rounded-[1.25rem] border border-border bg-[rgba(255,251,245,0.88)] px-4 py-4">
+            <div className="panel-outline rounded-[1.25rem] px-4 py-4">
               <p className="text-[11px] uppercase tracking-[0.18em] text-ink-soft">Inbox</p>
               <p className="mt-2 text-2xl font-semibold">{snapshot.captures.length}</p>
             </div>
@@ -99,7 +104,7 @@ export default async function Home() {
             {snapshot.review.highlights.map((highlight) => (
               <div
                 key={highlight}
-                className="rounded-[1.25rem] border border-border bg-[rgba(255,251,245,0.88)] px-4 py-3 text-sm"
+                className="panel-outline rounded-[1.25rem] px-4 py-3 text-sm"
               >
                 {highlight}
               </div>
@@ -120,7 +125,7 @@ export default async function Home() {
               <p className="text-sm uppercase tracking-[0.2em] text-ink-soft">Daily focus</p>
               <h2 className="display mt-2 text-3xl">Top 3 for today</h2>
             </div>
-            <div className="rounded-full border border-border px-3 py-1 text-sm text-ink-soft">
+            <div className="rounded-full border border-border/80 bg-white/55 px-3 py-1 text-sm text-ink-soft">
               {snapshot.dailyFocus.dateLabel}
             </div>
           </div>
@@ -134,7 +139,7 @@ export default async function Home() {
             {snapshot.dailyFocus.topTasks.map((task, index) => (
               <div
                 key={task.id}
-                className="rounded-[1.5rem] border border-border bg-[rgba(255,251,245,0.88)] p-5"
+                className="panel-outline rounded-[1.5rem] p-5"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
@@ -148,7 +153,7 @@ export default async function Home() {
                     className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${
                       task.done
                         ? "bg-[#d7eadf] text-success"
-                        : "bg-accent-soft text-accent-strong"
+                        : "bg-[rgba(244,217,195,0.8)] text-accent-strong"
                     }`}
                   >
                     {task.done ? "Done" : task.energy}
@@ -166,7 +171,9 @@ export default async function Home() {
                 <p className="text-sm uppercase tracking-[0.2em] text-ink-soft">Habit logger</p>
                 <h2 className="display mt-2 text-3xl">Consistency map</h2>
               </div>
-              <p className="text-sm text-ink-soft">{snapshot.habits.completionRate}% hit rate</p>
+              <p className="rounded-full border border-border/80 bg-white/55 px-3 py-1 text-sm text-ink-soft">
+                {snapshot.habits.completionRate}% hit rate
+              </p>
             </div>
             <Heatmap entries={snapshot.habits.heatmap} />
           </div>

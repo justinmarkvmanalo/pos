@@ -37,7 +37,7 @@ export default async function HabitsPage() {
   return (
     <AppShell>
       <section className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
-        <div data-tour="habits-overview" className="panel rounded-[2rem] p-6 sm:p-8">
+        <div data-tour="habits-overview" className="panel-raised dashboard-band rounded-[2rem] p-6 sm:p-8">
           <div className="mb-5 flex items-center gap-3 md:hidden">
             <Image
               src="/winos-logo.png"
@@ -52,7 +52,14 @@ export default async function HabitsPage() {
               <p className="display mt-1 text-xl">Habit rhythm</p>
             </div>
           </div>
-          <p className="text-sm uppercase tracking-[0.2em] text-ink-soft">Habit logger</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="accent-chip rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em]">
+              Habit logger
+            </span>
+            <span className="rounded-full border border-border/80 bg-white/55 px-3 py-1 text-xs text-ink-soft">
+              Weekly pace, streaks, consistency
+            </span>
+          </div>
           <h1 className="display mt-2 text-4xl">See consistency, not isolated days</h1>
           <p className="mt-4 max-w-3xl text-base leading-7 text-ink-soft">
             Set a weekly target, log the days you follow through, and watch the pace.
@@ -62,22 +69,22 @@ export default async function HabitsPage() {
         </div>
 
         <div className="grid content-start auto-rows-max gap-6 self-start">
-          <article data-tour="habits-pulse" className="panel rounded-[2rem] p-6">
+          <article data-tour="habits-pulse" className="panel-raised rounded-[2rem] p-6">
             <div>
               <p className="text-sm uppercase tracking-[0.16em] text-ink-soft">Habit pulse</p>
               <p className="mt-2 text-sm leading-6 text-ink-soft">See pace, streaks, and today&apos;s log at a glance.</p>
             </div>
 
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
-              <div className="rounded-[1.25rem] border border-border bg-surface-strong px-4 py-3">
+              <div className="stat-tile rounded-[1.25rem] px-4 py-3">
                 <p className="text-[11px] uppercase tracking-[0.18em] text-ink-soft">Tracked</p>
                 <p className="mt-2 text-2xl font-semibold">{habits.summaries.length}</p>
               </div>
-              <div className="rounded-[1.25rem] border border-border bg-surface-strong px-4 py-3">
+              <div className="stat-tile rounded-[1.25rem] px-4 py-3">
                 <p className="text-[11px] uppercase tracking-[0.18em] text-ink-soft">Active streaks</p>
                 <p className="mt-2 text-2xl font-semibold">{activeStreaks}</p>
               </div>
-              <div className="rounded-[1.25rem] border border-border bg-surface-strong px-4 py-3">
+              <div className="stat-tile rounded-[1.25rem] px-4 py-3">
                 <p className="text-[11px] uppercase tracking-[0.18em] text-ink-soft">On pace</p>
                 <p className="mt-2 text-2xl font-semibold">{habits.completionRate}%</p>
               </div>
@@ -93,7 +100,7 @@ export default async function HabitsPage() {
                 {groupedHabits.map(([category, categoryHabits]) => (
                   <details
                     key={category}
-                    className="group rounded-[1.35rem] border border-border bg-[linear-gradient(180deg,rgba(255,252,247,0.95),rgba(250,243,232,0.92))] px-4 py-3"
+                    className="group rounded-[1.35rem] border border-border bg-[linear-gradient(180deg,rgba(255,255,255,0.8),rgba(249,244,236,0.88))] px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.52)]"
                     open
                   >
                     <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
@@ -119,7 +126,7 @@ export default async function HabitsPage() {
                         return (
                           <div
                             key={habit.id}
-                            className="rounded-[1.15rem] border border-border bg-white/70 p-4"
+                            className="panel-outline rounded-[1.15rem] p-4"
                           >
                             <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
                               <div className="min-w-0">

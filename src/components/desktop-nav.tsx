@@ -16,7 +16,10 @@ export function DesktopNav() {
   const pathname = usePathname();
 
   return (
-    <nav data-tour="navigation" className="hidden flex-wrap gap-2 md:flex">
+    <nav
+      data-tour="navigation"
+      className="hidden flex-wrap items-center gap-2 rounded-full border border-border/80 bg-white/55 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.5)] md:flex"
+    >
       {navigation.filter((item) => item.href !== "/profile").map((item) => {
         const isActive = isActivePath(pathname, item.href);
 
@@ -25,10 +28,10 @@ export function DesktopNav() {
             key={item.href}
             href={item.href}
             aria-current={isActive ? "page" : undefined}
-            className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
+            className={`rounded-full px-4 py-2 text-sm font-medium transition ${
               isActive
-                ? "border-accent bg-accent text-white shadow-[0_10px_24px_rgba(157,67,34,0.28)]"
-                : "border-border bg-[rgba(255,251,245,0.88)] text-ink-soft hover:border-accent hover:text-accent-strong"
+                ? "bg-deep text-white shadow-[0_12px_24px_rgba(24,34,45,0.24)]"
+                : "text-ink-soft hover:bg-white/70 hover:text-foreground"
             }`}
           >
             {item.label}

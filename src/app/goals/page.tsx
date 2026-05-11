@@ -18,8 +18,15 @@ export default async function GoalsPage() {
 
   return (
     <AppShell>
-      <section data-tour="goals-create" className="panel rounded-[2rem] p-6 sm:p-8">
-        <p className="text-sm uppercase tracking-[0.2em] text-ink-soft">Goal tracker</p>
+      <section data-tour="goals-create" className="panel-raised dashboard-band rounded-[2rem] p-6 sm:p-8">
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="accent-chip rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em]">
+            Goal tracker
+          </span>
+          <span className="rounded-full border border-border/80 bg-white/55 px-3 py-1 text-xs text-ink-soft">
+            Outcomes, pressure, checkpoints
+          </span>
+        </div>
         <h1 className="display mt-2 text-4xl">Milestones with deadline pressure</h1>
         <p className="mt-4 max-w-3xl text-base leading-7 text-ink-soft">
           Set the outcome, break it into milestones, and let progress update from what gets done.
@@ -35,7 +42,7 @@ export default async function GoalsPage() {
           </article>
         ) : null}
         {goals.map((goal) => (
-          <article key={goal.id} className="panel rounded-[2rem] p-6">
+          <article key={goal.id} className="panel-raised rounded-[2rem] p-6">
             {(() => {
               const isFailed = Boolean(goal.deadline && goal.progress < 100 && goal.deadline < todayIso);
 
@@ -56,7 +63,7 @@ export default async function GoalsPage() {
                 </p>
               </div>
               <div className="flex flex-col items-end gap-2">
-                <span className="rounded-full bg-accent-soft px-3 py-1 text-sm font-semibold text-accent-strong">
+                <span className="accent-chip rounded-full px-3 py-1 text-sm font-semibold">
                   {goal.progress}%
                 </span>
                 {isFailed ? (
@@ -88,7 +95,7 @@ export default async function GoalsPage() {
                 {goal.milestones.map((milestone) => (
                   <div
                     key={milestone.id}
-                    className="rounded-[1.25rem] border border-border bg-white/70 px-4 py-3"
+                    className="panel-outline rounded-[1.25rem] px-4 py-3"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <p className="text-xs uppercase tracking-[0.18em] text-ink-soft">
@@ -118,7 +125,7 @@ export default async function GoalsPage() {
           </article>
         ))}
         </div>
-        <aside data-tour="goals-trophies" className="panel self-start rounded-[2rem] p-6">
+        <aside data-tour="goals-trophies" className="panel-raised self-start rounded-[2rem] p-6">
           <p className="text-sm uppercase tracking-[0.2em] text-ink-soft">Trophy case</p>
           <h2 className="mt-2 text-2xl font-semibold">Finished goals</h2>
           <p className="mt-3 text-sm leading-6 text-ink-soft">Completed goals land here.</p>

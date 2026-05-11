@@ -19,7 +19,7 @@ export function MobileNav() {
 
   return (
     <nav data-tour="navigation" className="fixed inset-x-0 bottom-0 z-20 px-4 pb-4 md:hidden">
-      <div className="panel no-scrollbar mx-auto flex max-w-xl items-center gap-2 overflow-x-auto rounded-[1.75rem] px-2 py-2">
+      <div className="nav-shell no-scrollbar mx-auto flex max-w-xl items-center gap-2 overflow-x-auto rounded-[1.75rem] px-2 py-2">
         {navigation.filter((item) => item.href !== "/profile").map((item) => {
           const isActive = isActivePath(pathname, item.href);
 
@@ -30,8 +30,8 @@ export function MobileNav() {
               aria-current={isActive ? "page" : undefined}
               className={`flex min-w-[3.25rem] shrink-0 items-center justify-center rounded-2xl px-2 py-3 transition ${
                 isActive
-                  ? "bg-accent text-white shadow-[0_10px_24px_rgba(157,67,34,0.28)]"
-                  : "text-ink-soft hover:bg-surface-strong hover:text-accent-strong"
+                  ? "bg-deep text-white shadow-[0_12px_24px_rgba(24,34,45,0.24)]"
+                  : "text-ink-soft hover:bg-white/70 hover:text-foreground"
               }`}
             >
               <NavIcon icon={item.icon} />
@@ -42,7 +42,7 @@ export function MobileNav() {
         <form action={logoutAction} className="shrink-0">
           <button
             type="submit"
-            className="flex min-w-[3.25rem] items-center justify-center rounded-2xl px-2 py-3 text-ink-soft transition hover:bg-surface-strong hover:text-accent-strong"
+            className="flex min-w-[3.25rem] items-center justify-center rounded-2xl px-2 py-3 text-ink-soft transition hover:bg-white/70 hover:text-foreground"
           >
             <NavIcon icon="logout" />
             <span className="sr-only">Log out</span>

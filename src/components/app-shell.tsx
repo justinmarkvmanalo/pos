@@ -13,7 +13,8 @@ export async function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-5 pb-24 sm:px-6 md:pb-5 lg:px-8">
-      <div className="panel-raised soft-enter sticky top-3 z-10 mb-3 rounded-[1.4rem] px-4 py-3 md:hidden">
+      <div className="soft-enter pointer-events-none absolute inset-x-0 top-0 -z-10 h-[26rem] bg-[radial-gradient(circle_at_top,rgba(24,34,45,0.1),transparent_58%)]" />
+      <div className="nav-shell soft-enter sticky top-3 z-10 mb-3 rounded-[1.4rem] px-4 py-3 md:hidden">
         <div className="flex items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
             <Image
@@ -26,7 +27,7 @@ export async function AppShell({ children }: { children: ReactNode }) {
             />
             <div className="min-w-0">
               <p className="text-[11px] uppercase tracking-[0.28em] text-ink-soft">winos</p>
-              <p className="truncate text-sm font-semibold">Personal Command Center</p>
+              <p className="truncate text-sm font-semibold">Operations cockpit</p>
             </div>
           </div>
           {user ? (
@@ -39,7 +40,7 @@ export async function AppShell({ children }: { children: ReactNode }) {
           ) : null}
         </div>
       </div>
-      <header className="panel-raised soft-enter sticky top-4 z-10 hidden rounded-[1.75rem] px-5 py-4 md:block">
+      <header className="nav-shell soft-enter sticky top-4 z-10 hidden rounded-[1.75rem] px-5 py-4 md:block">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0">
             <div className="flex items-center gap-3">
@@ -53,7 +54,10 @@ export async function AppShell({ children }: { children: ReactNode }) {
               />
               <div className="min-w-0">
                 <p className="text-xs uppercase tracking-[0.28em] text-ink-soft">winos</p>
-                <p className="display mt-1 text-2xl">Personal Command Center</p>
+                <p className="display mt-1 text-2xl">Operations cockpit</p>
+                <p className="mt-1 text-sm text-ink-soft">
+                  Daily execution, habits, reviews, and goals in one lane.
+                </p>
               </div>
             </div>
           </div>
